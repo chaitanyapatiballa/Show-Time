@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\repos\\MovieService\\PaymentService\\PaymentService.csproj": {}
+    "D:\\repos\\Show-Time\\PaymentService\\PaymentService.csproj": {}
   },
   "projects": {
-    "D:\\repos\\MovieService\\PaymentService\\PaymentService.csproj": {
+    "D:\\repos\\Show-Time\\PaymentService\\PaymentService.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\repos\\MovieService\\PaymentService\\PaymentService.csproj",
+        "projectUniqueName": "D:\\repos\\Show-Time\\PaymentService\\PaymentService.csproj",
         "projectName": "PaymentService",
-        "projectPath": "D:\\repos\\MovieService\\PaymentService\\PaymentService.csproj",
+        "projectPath": "D:\\repos\\Show-Time\\PaymentService\\PaymentService.csproj",
         "packagesPath": "C:\\Users\\chaitanya\\.nuget\\packages\\",
-        "outputPath": "D:\\repos\\MovieService\\PaymentService\\obj\\",
+        "outputPath": "D:\\repos\\Show-Time\\PaymentService\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
