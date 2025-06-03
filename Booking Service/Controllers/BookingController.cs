@@ -15,7 +15,7 @@ namespace Booking_Service.Controllers
             _bookingService = bookingService;
         }
 
-       
+
         [HttpPost]
         public async Task<IActionResult> AddBooking([FromBody] BookingDto dto)
         {
@@ -35,17 +35,15 @@ namespace Booking_Service.Controllers
             try
             {
                 var createdBooking = await _bookingService.AddBooking(booking);
-                if (createdBooking == null)
-                    return BadRequest("Booking failed due to unavailable seat or invalid data");
-
                 return CreatedAtAction(nameof(GetBookingById), new { id = createdBooking.Id },
                     new { Message = "Booking created successfully", Booking = createdBooking });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while processing the booking");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
 
 
         [HttpGet("{id}")]

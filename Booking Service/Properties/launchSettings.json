@@ -9,22 +9,12 @@
     }
   },
   "profiles": {
-    "http": {
+    "BookingService": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5119",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "https": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7180",
+      "applicationUrl": "http://localhost:5104;https://localhost:7104",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
