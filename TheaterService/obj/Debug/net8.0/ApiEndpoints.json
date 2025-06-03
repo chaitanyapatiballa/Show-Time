@@ -1,0 +1,116 @@
+[
+  {
+    "ContainingType": "TheaterService.Controllers.TheatersController",
+    "Method": "AddTheater",
+    "RelativePath": "api/Theaters/AddTheater",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "theater",
+        "Type": "TheaterService.Models.Theater",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "TheaterService.Models.Theater",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "TheaterService.Controllers.TheatersController",
+    "Method": "DeleteTheater",
+    "RelativePath": "api/Theaters/DeleteTheater/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TheaterService.Controllers.TheatersController",
+    "Method": "GetTheater",
+    "RelativePath": "api/Theaters/GetTheater/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "TheaterService.Models.Theater",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "TheaterService.Controllers.TheatersController",
+    "Method": "GetTheaters",
+    "RelativePath": "api/Theaters/GetTheaters",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[TheaterService.Models.Theater, TheaterService, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "TheaterService.Controllers.TheatersController",
+    "Method": "UpdateTheater",
+    "RelativePath": "api/Theaters/UpdateTheater",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "theater",
+        "Type": "TheaterService.Models.Theater",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "TheaterService.Models.Theater",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
