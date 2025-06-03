@@ -5,15 +5,13 @@ namespace MovieService.Data
 {
     public class MovieDbContext : DbContext
     {
+        public DbSet<Movie> Movies { get; set; }
+
         public MovieDbContext(DbContextOptions<MovieDbContext> options) : base(options) { }
 
-        public DbSet<Movie> Movies { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Movie>().ToTable("Movies"); 
+            modelBuilder.Entity<Movie>().ToTable("Movies");
         }
     }
 }
-
-
