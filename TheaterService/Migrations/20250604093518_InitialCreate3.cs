@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace PaymentService.Migrations
+namespace TheaterService.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate3 : Migration

@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using MovieService.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TheaterService.Data;
 
 #nullable disable
 
-namespace TheaterService.Migrations
+namespace MovieService.Migrations
 {
-    [DbContext(typeof(TheaterDbContext))]
-    [Migration("20250603074505_InitialCreate2")]
-    partial class InitialCreate2
+    [DbContext(typeof(MovieDbContext))]
+    [Migration("20250604093328_InitialCreate1")]
+    partial class InitialCreate1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace TheaterService.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TheaterService.Models.Theater", b =>
+            modelBuilder.Entity("MovieService.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,18 +32,18 @@ namespace TheaterService.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Capacity")
+                    b.Property<int>("Duration")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("Genre")
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Title")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Theaters");
+                    b.ToTable("Movies", (string)null);
                 });
 #pragma warning restore 612, 618
         }
