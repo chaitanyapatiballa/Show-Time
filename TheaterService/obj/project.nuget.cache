@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "w1SPC0PZiug=",
+  "dgSpecHash": "893GgPSOPdA=",
   "success": true,
-  "projectFilePath": "D:\\repos\\Show-Time\\TheaterService\\TheaterService.csproj",
+  "projectFilePath": "C:\\Users\\chaitanya\\Source\\Repos\\Show-Time\\TheaterService\\TheaterService.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\chaitanya\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\chaitanya\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
