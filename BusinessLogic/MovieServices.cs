@@ -1,4 +1,4 @@
-﻿using DBModels.Models;
+﻿using DBModels.Db;
 using MovieService.Repositories;
 namespace MovieService.Services
 {

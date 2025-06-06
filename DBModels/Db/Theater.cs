@@ -1,12 +1,11 @@
 ﻿
-namespace DBModels.Models
+namespace DBModels.Db;
+
+public class Theater
 {
-    public class Theater
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? Location { get; set; }
-        public int Capacity { get; set; }
-        public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
-    }
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public string? Location { get; set; }
+    public int Capacity { get; set; }
+    public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
 }

@@ -1,4 +1,4 @@
-﻿using DBModels.Models;
+﻿using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
 using PaymentService.Services;

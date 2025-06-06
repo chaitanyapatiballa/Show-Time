@@ -1,7 +1,8 @@
 ﻿using Booking_Service.Repositories;
-using DBModels.Models;
+using DBModels.Db;
 using PaymentService.DTOs;
 using System.Net.Http.Json;
+
 
 namespace Booking_Service.Services
 {

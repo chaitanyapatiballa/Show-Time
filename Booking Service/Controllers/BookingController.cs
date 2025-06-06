@@ -1,6 +1,6 @@
 ﻿using Booking_Service.DTOs;
 using Booking_Service.Services;
-using DBModels.Models;
+using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Booking_Service.Controllers

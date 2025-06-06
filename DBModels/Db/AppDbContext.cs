@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using DBModels.Models;
-
 namespace DBModels.Db
 {
     public class AppDbContext : DbContext

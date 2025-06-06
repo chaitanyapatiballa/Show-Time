@@ -1,4 +1,4 @@
-﻿using DBModels.Models;
+﻿using DBModels.Db;
 using TheaterService.Repositories;
 
 namespace TheaterService.Services

@@ -1,5 +1,4 @@
 ﻿using DBModels.Db;
-using DBModels.Models;
 
 namespace PaymentService.Repositories
 {
