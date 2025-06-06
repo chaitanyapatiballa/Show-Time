@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TheaterService;
-using TheaterService.Models;
+﻿using DBModels.Models;
+using Microsoft.AspNetCore.Mvc;
 using TheaterService.Services;
 
 namespace TheaterService.Controllers

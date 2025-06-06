@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DBModels.Models;
+using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
-using PaymentService.Models;
 using PaymentService.Services;
 
 namespace PaymentService.Controllers
