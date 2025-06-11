@@ -1,4 +1,4 @@
-﻿
+﻿using BookingService.DTOs;
 using BookingService.Services;
 using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +17,19 @@ namespace BookingService.Controllers
         }
 
         [HttpPost("CreateBooking")]
-        public async Task<IActionResult> CreateBooking([FromBody] Booking booking)
+        public async Task<IActionResult> CreateBooking([FromBody] BookingDto bookingDto)
         {
-            var result = await _service.CreateBookingWithDetailsAsync(booking);
-            if (result == null)
-                return BadRequest("Booking failed or invalid references.");
+            var booking = await _service.CreateBookingWithDetailsAsync(new Booking
+            {
+                UserId = bookingDto.UserId,
+                MovieId = bookingDto.MovieId,
+                TheaterId = bookingDto.TheaterId,
+                PaymentId = bookingDto.PaymentId,
+                SeatNumber = bookingDto.SeatNumber,
+                BookingTime = bookingDto.BookingTime
+            });
 
-            return Ok(result);
+            return Ok(booking);
         }
 
         [HttpGet("GetBooking/{id}")]

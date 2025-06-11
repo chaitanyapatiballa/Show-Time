@@ -1,5 +1,4 @@
-﻿
-using BookingService.Repositories;
+﻿using BookingService.Repositories;
 using DBModels.Db;
 using MovieService.Models;
 using PaymentService.DTOs;
@@ -55,3 +54,4 @@ namespace BookingService.Services
         }
     }
 }
+
