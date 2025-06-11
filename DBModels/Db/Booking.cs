@@ -10,7 +10,8 @@ public class Booking
     public string SeatNumber { get; set; }
     public DateTime BookingTime { get; set; }
     public bool IsCancelled { get; set; }
-    public string Status { get; set; }
+    public string Status { get; set; } = "Pending";
+
 
     // Navigation Properties (must be added)
     public Movie Movie { get; set; }
