@@ -2,8 +2,8 @@
 {
     public class PaymentDto
     {
-        public int Id { get; set; }         
-        public string UserId { get; set; } = string.Empty;
+        public int PaymentId { get; set; }       
+        public string UserId { get; set; }
         public int BookingId { get; set; }
         public decimal Amount { get; set; }
         public DateTime PaymentTime { get; set; }

@@ -8,12 +8,12 @@ namespace Booking_Service.Services
     public class BookingServices
     {
         private readonly BookingRepository _bookingRepository;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public BookingServices(BookingRepository bookingRepository, IHttpClientFactory httpClientFactory)
+        public BookingServices(BookingRepository bookingRepository, HttpClient httpClient)
         {
             _bookingRepository = bookingRepository;
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
         public async Task<Booking?> GetBookingByIdAsync(int id)
@@ -31,17 +31,28 @@ namespace Booking_Service.Services
             if (theater == null)
                 throw new InvalidOperationException("Theater not found");
 
-            // Save booking first with status Pending
-            booking.Status = "Pending";
             var savedBooking = await _bookingRepository.AddBooking(booking);
 
-            // Call payment service
-            var paymentId = await MakePaymentAsync(booking.UserId.ToString(), savedBooking.Id, 550);
-            if (paymentId == null)
+            var payment = new PaymentDto
+            {
+                UserId = booking.UserId.ToString(),
+                BookingId = savedBooking.Id,
+                Amount = 550,
+                PaymentTime = DateTime.UtcNow,
+                IsSuccessful = true
+            };
+
+            var paymentResponse = await _httpClient.PostAsJsonAsync("http://localhost:5102/api/Payment", payment);
+
+            if (!paymentResponse.IsSuccessStatusCode)
                 throw new InvalidOperationException("Payment failed");
 
-            // Update Booking with PaymentId and status
-            savedBooking.PaymentId = paymentId.Value;
+            var paymentData = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
+
+            if (paymentData == null)
+                throw new InvalidOperationException("Payment response invalid");
+
+            savedBooking.PaymentId = paymentData.PaymentId;
             savedBooking.Status = "Confirmed";
 
             await _bookingRepository.UpdateBookingAsync(savedBooking);
@@ -54,64 +65,65 @@ namespace Booking_Service.Services
             await _bookingRepository.CancelBookingAsync(id);
         }
 
+        public async Task<object?> GetBookingDetailsAsync(int id)
+        {
+            var booking = await _bookingRepository.GetBookingsId(id);
+            if (booking == null) return null;
+
+            var movie = await GetMovieAsync(booking.MovieId);
+            var theater = await GetTheaterAsync(booking.TheaterId);
+            var payment = await GetPaymentAsync(booking.PaymentId);
+
+            return new
+            {
+                BookingId = booking.Id,
+                booking.UserId,
+                booking.SeatNumber,
+                booking.BookingTime,
+                booking.IsCancelled,
+                booking.Status,
+                Movie = movie,
+                Theater = theater,
+                Payment = payment
+            };
+        }
+
         private async Task<object?> GetMovieAsync(int movieId)
         {
+            var url = $"http://localhost:7105/api/Movies/GetMovie/{movieId}";
             try
             {
-                var client = _httpClientFactory.CreateClient("MovieService");
-                var response = await client.GetAsync($"/api/Movies/{movieId}");
+                var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                     return await response.Content.ReadFromJsonAsync<object>();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error calling MovieService: {ex.Message}");
-            }
+            catch { }
             return null;
         }
 
         private async Task<object?> GetTheaterAsync(int theaterId)
         {
+            var url = $"http://localhost:7106/api/Theaters/GetTheater/{theaterId}";
             try
             {
-                var client = _httpClientFactory.CreateClient("TheaterService");
-                var response = await client.GetAsync($"/api/Theaters/{theaterId}");
+                var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                     return await response.Content.ReadFromJsonAsync<object>();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error calling TheaterService: {ex.Message}");
-            }
+            catch { }
             return null;
         }
 
-        private async Task<int?> MakePaymentAsync(string userId, int bookingId, decimal amount)
+        private async Task<object?> GetPaymentAsync(int paymentId)
         {
-            var client = _httpClientFactory.CreateClient("PaymentService");
-
-            var payment = new PaymentDto
-            {
-                UserId = userId,
-                BookingId = bookingId,
-                Amount = amount,
-                PaymentTime = DateTime.UtcNow,
-                IsSuccessful = true
-            };
-
+            var url = $"http://localhost:7107/api/Payment/{paymentId}";
             try
             {
-                var response = await client.PostAsJsonAsync("/api/Payment", payment);
+                var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
-                {
-                    var createdPayment = await response.Content.ReadFromJsonAsync<PaymentDto>();
-                    return createdPayment?.Id;
-                }
+                    return await response.Content.ReadFromJsonAsync<object>();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error calling PaymentService: {ex.Message}");
-            }
+            catch { }
             return null;
         }
     }

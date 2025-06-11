@@ -1,5 +1,5 @@
 ﻿using DBModels.Db;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Booking_Service.Repositories
 {
@@ -27,11 +27,7 @@ namespace Booking_Service.Repositories
         public async Task CancelBookingAsync(int id)
         {
             var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
-            {
-                // Optionally log or throw here
-                return;
-            }
+            if (booking == null) return;
 
             if (!booking.IsCancelled)
             {
@@ -39,12 +35,11 @@ namespace Booking_Service.Repositories
                 await _context.SaveChangesAsync();
             }
         }
-            public async Task UpdateBookingAsync(Booking booking)
+
+        public async Task UpdateBookingAsync(Booking booking)
         {
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
         }
-
     }
 }
-
