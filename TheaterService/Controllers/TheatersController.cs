@@ -1,5 +1,6 @@
 ﻿using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
+using TheaterService.DTOs;
 using TheaterService.Services;
 
 namespace TheaterService.Controllers
@@ -48,22 +49,40 @@ namespace TheaterService.Controllers
         }
 
         [HttpPost("AddTheater")]
-        public async Task<ActionResult<Theater>> AddTheater(Theater theater)
+        public async Task<ActionResult<TheaterDto>> AddTheater([FromBody] TheaterDto theaterDto)
         {
             try
             {
-                if (theater == null || string.IsNullOrEmpty(theater.Name) || string.IsNullOrEmpty(theater.Location) || theater.Capacity <= 0)
+                if (theaterDto == null || string.IsNullOrEmpty(theaterDto.Name) || string.IsNullOrEmpty(theaterDto.Location) || theaterDto.Capacity <= 0)
                 {
                     return BadRequest("Invalid theater data.");
                 }
+
+                var theater = new Theater
+                {
+                    Name = theaterDto.Name,
+                    Location = theaterDto.Location,
+                    Capacity = theaterDto.Capacity
+                };
+
                 var addedTheater = await _service.AddTheaterAsync(theater);
-                return CreatedAtAction(nameof(GetTheater), new { id = addedTheater.Id }, addedTheater);
+
+                var resultDto = new TheaterDto
+                {
+                    Id = addedTheater.Id,
+                    Name = addedTheater.Name,
+                    Location = addedTheater.Location,
+                    Capacity = addedTheater.Capacity
+                };
+
+                return CreatedAtAction(nameof(GetTheater), new { id = resultDto.Id }, resultDto);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred while adding theater: {ex.Message}");
             }
         }
+
 
         [HttpPut("UpdateTheater")]
         public async Task<ActionResult<Theater>> UpdateTheater(Theater theater)
