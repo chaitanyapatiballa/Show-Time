@@ -5,7 +5,6 @@ using MovieService.DTOs;
 using MovieService.Models;
 using MovieService.Services;
 
-
 namespace MovieService.Controllers
 {
     [ApiController]
@@ -29,9 +28,10 @@ namespace MovieService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while retrieving movies: {ex.Message}");
+                return StatusCode(500, $"Error retrieving movies: {ex.Message}");
             }
         }
+
         [HttpGet("GetMovie/{id}")]
         public async Task<ActionResult<Movie>> GetMovie(int id)
         {
@@ -39,25 +39,23 @@ namespace MovieService.Controllers
             {
                 var movie = await _movieService.GetMovieByIdAsync(id);
                 if (movie == null)
-                {
                     return NotFound($"Movie with ID {id} not found.");
-                }
+
                 return Ok(movie);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while retrieving movie: {ex.Message}");
+                return StatusCode(500, $"Error retrieving movie: {ex.Message}");
             }
         }
+
         [HttpPost("AddMovie")]
         public async Task<ActionResult<Movie>> AddMovie(MovieDto movieDto)
         {
             try
             {
-                if (movieDto == null ||
-                    string.IsNullOrEmpty(movieDto.Title) ||
-                    string.IsNullOrEmpty(movieDto.Genre) ||
-                    string.IsNullOrEmpty(movieDto.Duration))
+                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) ||
+                    string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }
@@ -66,29 +64,30 @@ namespace MovieService.Controllers
                 {
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
-                    Duration = movieDto.Duration
+                    Duration = movieDto.Duration,
+                    TheaterId = movieDto.TheaterId
                 };
 
-                var createdMovie = await _movieService.AddMovieAsync(movie);
-                return CreatedAtAction(nameof(GetMovies), new { id = createdMovie.Id }, createdMovie);
+                var created = await _movieService.AddMovieAsync(movie);
+                return CreatedAtAction(nameof(GetMovie), new { id = created.Id }, created);
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, $"Database error while adding movie: {ex.InnerException?.Message ?? ex.Message}");
+                return StatusCode(500, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while adding movie: {ex.Message}");
+                return StatusCode(500, $"Error adding movie: {ex.Message}");
             }
         }
-
 
         [HttpPut("UpdateMovie/{id}")]
         public async Task<ActionResult<Movie>> UpdateMovie(int id, MovieDto movieDto)
         {
             try
             {
-                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) || string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
+                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) ||
+                    string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }
@@ -98,24 +97,23 @@ namespace MovieService.Controllers
                     Id = id,
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
-                    Duration = movieDto.Duration
+                    Duration = movieDto.Duration,
+                    TheaterId = movieDto.TheaterId
                 };
 
-                var updatedMovie = await _movieService.UpdateMovieAsync(movie);
-                if (updatedMovie == null)
-                {
+                var updated = await _movieService.UpdateMovieAsync(movie);
+                if (updated == null)
                     return NotFound($"Movie with ID {id} not found.");
-                }
 
-                return Ok(updatedMovie);
+                return Ok(updated);
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, $"Database error while updating movie: {ex.InnerException?.Message ?? ex.Message}");
+                return StatusCode(500, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while updating movie: {ex.Message}");
+                return StatusCode(500, $"Error updating movie: {ex.Message}");
             }
         }
 
@@ -126,19 +124,17 @@ namespace MovieService.Controllers
             {
                 var deleted = await _movieService.DeleteMovieAsync(id);
                 if (!deleted)
-                {
                     return NotFound($"Movie with ID {id} not found.");
-                }
 
                 return NoContent();
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, $"Database error while deleting movie: {ex.InnerException?.Message ?? ex.Message}");
+                return StatusCode(500, $"Database error: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"An error occurred while deleting movie: {ex.Message}");
+                return StatusCode(500, $"Error deleting movie: {ex.Message}");
             }
         }
     }

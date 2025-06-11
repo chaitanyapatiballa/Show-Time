@@ -1,5 +1,6 @@
 ﻿using DBModels.Db;
 using MovieService.Repositories;
+
 namespace MovieService.Services
 {
     public class MovieServices
@@ -28,7 +29,6 @@ namespace MovieService.Services
 
         public async Task<Movie?> UpdateMovieAsync(Movie movie)
         {
-            
             return await _movieRepository.UpdateMovieAsync(movie);
         }
 
@@ -38,3 +38,4 @@ namespace MovieService.Services
         }
     }
 }
+

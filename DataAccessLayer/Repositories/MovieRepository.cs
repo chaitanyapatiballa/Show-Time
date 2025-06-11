@@ -1,7 +1,6 @@
 ﻿using DBModels.Db;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace MovieService.Repositories
 {
     public class MovieRepository
@@ -17,10 +16,12 @@ namespace MovieService.Repositories
         {
             return await _context.Movies.ToListAsync();
         }
+
         public async Task<Movie?> GetMovieByIdAsync(int id)
         {
             return await _context.Movies.FindAsync(id);
         }
+
         public async Task<Movie> AddMovieAsync(Movie movie)
         {
             _context.Movies.Add(movie);
@@ -30,26 +31,22 @@ namespace MovieService.Repositories
 
         public async Task<Movie?> UpdateMovieAsync(Movie movie)
         {
-            var existingMovie = await _context.Movies.FindAsync(movie.Id);
-            if (existingMovie == null)
-            {
-                return null;
-            }
+            var existing = await _context.Movies.FindAsync(movie.Id);
+            if (existing == null) return null;
 
-            existingMovie.Title = movie.Title;
-            existingMovie.Genre = movie.Genre;
-            existingMovie.Duration = movie.Duration;
+            existing.Title = movie.Title;
+            existing.Genre = movie.Genre;
+            existing.Duration = movie.Duration;
+            existing.TheaterId = movie.TheaterId;
+
             await _context.SaveChangesAsync();
-            return existingMovie;
+            return existing;
         }
 
         public async Task<bool> DeleteMovieAsync(int id)
         {
             var movie = await _context.Movies.FindAsync(id);
-            if (movie == null)
-            {
-                return false;
-            }
+            if (movie == null) return false;
 
             _context.Movies.Remove(movie);
             await _context.SaveChangesAsync();
