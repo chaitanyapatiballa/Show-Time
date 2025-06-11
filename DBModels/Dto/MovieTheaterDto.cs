@@ -1,4 +1,4 @@
-﻿namespace MovieService.DTOs
+﻿namespace TheaterService.DTOs
 {
     public class MovieTheaterDto
     {

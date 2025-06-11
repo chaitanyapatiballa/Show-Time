@@ -17,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register your services and repositories
 builder.Services.AddScoped<TheaterRepository>();
 builder.Services.AddScoped<TheaterServices>();
+builder.Services.AddScoped<MovieTheaterRepository>();
+builder.Services.AddScoped<MovieTheaterServices>();
+
 
 var app = builder.Build();
 
