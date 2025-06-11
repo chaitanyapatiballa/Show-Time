@@ -1,10 +1,7 @@
 ﻿using Booking_Service.DTOs;
-using Booking_Service.HttpClients;
 using Booking_Service.Services;
 using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace Booking_Service.Controllers
 {
@@ -13,21 +10,12 @@ namespace Booking_Service.Controllers
     public class BookingController : ControllerBase
     {
         private readonly BookingServices _bookingService;
-        private readonly IMovieServiceClient _movieService;
-        private readonly ITheaterServiceClient _theaterService;
-        private readonly IPaymentServiceClient _paymentService;
 
-        public BookingController(
-            BookingServices bookingService,
-            IMovieServiceClient movieService,
-            ITheaterServiceClient theaterService,
-            IPaymentServiceClient paymentService)
+        public BookingController(BookingServices bookingService)
         {
             _bookingService = bookingService;
-            _movieService = movieService;
-            _theaterService = theaterService;
-            _paymentService = paymentService;
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddBooking([FromBody] BookingDto dto)
@@ -38,35 +26,19 @@ namespace Booking_Service.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var booking = new Booking
+            {
+                MovieId = dto.MovieId,
+                TheaterId = dto.TheaterId,
+                SeatNumber = dto.SeatNumber,
+                UserId = dto.UserId,
+                BookingTime = DateTime.UtcNow,
+                IsCancelled = false
+            };
+
             try
             {
-                // Validate Movie and Theater existence
-                var movieResult = await _movieService.GetMovieAsync(dto.MovieId);
-                var theaterResult = await _theaterService.GetTheaterAsync(dto.TheaterId);
-
-                if (movieResult == null || theaterResult == null)
-                    return BadRequest("Invalid Movie or Theater ID.");
-
-                // Process payment (simulate external service)
-                var paymentResponse = await _paymentService.ProcessPaymentAsync(dto.PaymentId);
-                if (string.IsNullOrEmpty(paymentResponse))
-                    return BadRequest("Payment processing failed.");
-
-                // Map BookingDto to Booking entity
-                var booking = new Booking
-                {
-                    MovieId = dto.MovieId,
-                    TheaterId = dto.TheaterId,
-                    SeatNumber = dto.SeatNumber,
-                    UserId = dto.UserId,
-                    PaymentId = dto.PaymentId,
-                    BookingTime = DateTime.UtcNow,
-                    IsCancelled = false
-                };
-
-                // Fix: Pass BookingDto instead of Booking entity
-                var createdBooking = await _bookingService.AddBooking(dto);
-
+                var createdBooking = await _bookingService.AddBooking(booking);
                 return CreatedAtAction(nameof(GetBookingById), new { id = createdBooking.Id }, new
                 {
                     Message = "Booking created successfully.",
@@ -75,9 +47,11 @@ namespace Booking_Service.Controllers
             }
             catch (Exception ex)
             {
+
                 return StatusCode(500, $"An error occurred while creating the booking: {ex.Message}");
             }
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBookingById(int id)
@@ -98,6 +72,7 @@ namespace Booking_Service.Controllers
                 return StatusCode(500, $"An error occurred while retrieving the booking: {ex.Message}");
             }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Cancel(int id)
