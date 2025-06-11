@@ -39,5 +39,12 @@ namespace Booking_Service.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+            public async Task UpdateBookingAsync(Booking booking)
+        {
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
+
