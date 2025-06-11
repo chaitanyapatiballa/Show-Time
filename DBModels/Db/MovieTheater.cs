@@ -1,10 +1,14 @@
-﻿
-namespace DBModels.Db;
+﻿using System;
 
-public class MovieTheater
+namespace DBModels.Db
 {
-    public int MovieId { get; set; }
-    public Movie Movie { get; set; } = null!;
-    public int TheaterId { get; set; }
-    public Theater Theater { get; set; } = null!;
+    public class MovieTheater
+    {
+        public int MovieId { get; set; }
+        public int TheaterId { get; set; }
+
+        public Movie Movie { get; set; } = null!;
+        public Theater Theater { get; set; } = null!;
+
+    }
 }

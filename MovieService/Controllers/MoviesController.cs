@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieService.DTOs;
+using MovieService.Models;
 using MovieService.Services;
 
 
@@ -48,13 +49,15 @@ namespace MovieService.Controllers
                 return StatusCode(500, $"An error occurred while retrieving movie: {ex.Message}");
             }
         }
-
         [HttpPost("AddMovie")]
         public async Task<ActionResult<Movie>> AddMovie(MovieDto movieDto)
         {
             try
             {
-                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) || string.IsNullOrEmpty(movieDto.Genre) || movieDto.Duration <= 0)
+                if (movieDto == null ||
+                    string.IsNullOrEmpty(movieDto.Title) ||
+                    string.IsNullOrEmpty(movieDto.Genre) ||
+                    string.IsNullOrEmpty(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }
@@ -79,12 +82,13 @@ namespace MovieService.Controllers
             }
         }
 
+
         [HttpPut("UpdateMovie/{id}")]
         public async Task<ActionResult<Movie>> UpdateMovie(int id, MovieDto movieDto)
         {
             try
             {
-                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) || string.IsNullOrEmpty(movieDto.Genre) || movieDto.Duration <= 0)
+                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) || string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }

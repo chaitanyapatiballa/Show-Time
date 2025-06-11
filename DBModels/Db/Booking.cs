@@ -1,20 +1,17 @@
-﻿
-
-namespace DBModels.Db;
-
-public enum BookingStatus { Pending, Confirmed, Cancelled, Failed }
+﻿using DBModels.Db;
 
 public class Booking
 {
     public int Id { get; set; }
     public int UserId { get; set; }
     public int MovieId { get; set; }
-    public Movie Movie { get; set; } = null!;
     public int TheaterId { get; set; }
-    public Theater Theater { get; set; } = null!;
-    public int? SeatNumber { get; set; }
-    public DateTime BookingTime { get; set; } = DateTime.UtcNow;
-    public bool IsCancelled { get; set; } = false;
-    public BookingStatus Status { get; set; } = BookingStatus.Pending;
-    public Payment? Payment { get; set; }
+    public string SeatNumber { get; set; } = string.Empty;
+    public DateTime BookingTime { get; set; }
+    public bool IsCancelled { get; set; }
+    public string Status { get; set; } = "Pending";
+    public int PaymentId { get; set; }
+    public Movie? Movie { get; set; }
+    public Theater? Theater { get; set; }
+    public virtual Payment? Payment { get; set; }
 }

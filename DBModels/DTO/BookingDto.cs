@@ -3,9 +3,9 @@
     public class BookingDto
     {
         public int UserId { get; set; }
-        public int TheaterId { get; set; }
         public int MovieId { get; set; }
-        public int? SeatNumber { get; set; }
-        public DateTime BookingTime { get; set; } = DateTime.UtcNow;
+        public int TheaterId { get; set; }
+        public string SeatNumber { get; set; } = string.Empty;
+        public int PaymentId { get; set; }
     }
 }

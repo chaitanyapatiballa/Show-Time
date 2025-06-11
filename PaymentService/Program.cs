@@ -11,14 +11,15 @@ using TheaterService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Register DbContext
+//  Register DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ✅ Register HttpClient factory for DI
+
+//  Register HttpClient factory for DI
 builder.Services.AddHttpClient();
 
-// ✅ Register Repositories & Services
+//  Register Repositories & Services
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<MovieRepository>();
 builder.Services.AddScoped<TheaterRepository>();

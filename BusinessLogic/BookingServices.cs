@@ -1,110 +1,82 @@
-﻿using Booking_Service.Repositories;
+﻿using Booking_Service.DTOs;
+using Booking_Service.HttpClients;
 using DBModels.Db;
-using PaymentService.DTOs;
-using System.Net.Http.Json;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace Booking_Service.Services
 {
     public class BookingServices
     {
-        private readonly BookingRepository _bookingRepository;
-        private readonly HttpClient _httpClient;
+        private readonly AppDbContext _context;
+        private readonly IMovieServiceClient _movieService;
+        private readonly ITheaterServiceClient _theaterService;
+        private readonly IPaymentServiceClient _paymentService;
 
-        public BookingServices(BookingRepository bookingRepository, HttpClient httpClient)
+        public BookingServices(
+            AppDbContext context,
+            IMovieServiceClient movieService,
+            ITheaterServiceClient theaterService,
+            IPaymentServiceClient paymentService)
         {
-            _bookingRepository = bookingRepository;
-            _httpClient = httpClient;
+            _context = context;
+            _movieService = movieService;
+            _theaterService = theaterService;
+            _paymentService = paymentService;
         }
 
-        public async Task<Booking?> GetBookingByIdAsync(int id)
+        public async Task<Booking> AddBooking(BookingDto dto)
         {
-            return await _bookingRepository.GetBookingsId(id);
-        }
+            if (dto == null)
+                throw new ArgumentNullException(nameof(dto));
 
-        public async Task<Booking> AddBooking(Booking booking)
-        {
-            // Validate with MovieService
-            var movie = await GetMovieAsync(booking.MovieId);
+            // Validate Movie and Theater exist via HTTP call
+            var movie = await _movieService.GetMovieAsync(dto.MovieId);
+            var theater = await _theaterService.GetTheaterAsync(dto.TheaterId);
+
             if (movie == null)
-                throw new InvalidOperationException("Movie not found");
-
-            // Validate with TheaterService
-            var theater = await GetTheaterAsync(booking.TheaterId);
+                throw new Exception("Invalid Movie ID.");
             if (theater == null)
-                throw new InvalidOperationException("Theater not found");
+                throw new Exception("Invalid Theater ID.");
 
-            // Save booking to DB
-            var BookingSuccessful = await _bookingRepository.AddBooking(booking);
+            // Step 1: Save booking without paymentId
+            var booking = new Booking
+            {
+                MovieId = dto.MovieId,
+                TheaterId = dto.TheaterId,
+                SeatNumber = dto.SeatNumber,
+                UserId = dto.UserId,
+                BookingTime = DateTime.UtcNow,
+                IsCancelled = false
+            };
 
-            // Attempt payment via PaymentService
-            var paymentSuccess = await MakePaymentAsync(booking.UserId.ToString(), BookingSuccessful.Id, 550); // Fixed amount
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync(); // Booking ID is generated
 
-            if (!paymentSuccess)
-                throw new InvalidOperationException("Payment failed");
+            // Step 2: Create Payment and update Booking
+            var paymentId = await _paymentService.CreatePaymentAsync(booking.Id);
+            booking.PaymentId = paymentId;
 
-            return BookingSuccessful;
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+
+            return booking;
+        }
+
+        public async Task<Booking> GetBookingByIdAsync(int id)
+        {
+            return await _context.Bookings
+                .Include(b => b.Movie)
+                .Include(b => b.Theater)
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
 
         public async Task CancelBookingAsync(int id)
         {
-            await _bookingRepository.CancelBookingAsync(id);
-        }
-
-     
-
-        private async Task<object?> GetMovieAsync(int movieId)
-        {
-            var url = $"http://localhost:5000/api/movies/{movieId}";
-            try
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking != null && !booking.IsCancelled)
             {
-                var response = await _httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
-                    return await response.Content.ReadFromJsonAsync<object>();
-            }
-            catch (Exception )
-            {
-               
-            }
-            return null;
-        }
-
-        private async Task<object?> GetTheaterAsync(int theaterId)
-        {
-            var url = $"http://localhost:5101/api/Theaters/GetTheater/{theaterId}";
-            try
-            {
-                var response = await _httpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
-                    return await response.Content.ReadFromJsonAsync<object>();
-            }
-            catch (Exception )
-            {
-                
-            }
-            return null;
-        }
-
-        private async Task<bool> MakePaymentAsync(string userId, int bookingId, decimal amount)
-        {
-            var payment = new PaymentDto
-            {
-                UserId = userId,
-                BookingId = bookingId,
-                Amount = amount,
-                PaymentTime = DateTime.UtcNow,
-                IsSuccessful = true 
-            };
-
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("http://localhost:5102/api/Payment", payment);
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception )
-            {
-                
-                return false;
+                booking.IsCancelled = true;
+                await _context.SaveChangesAsync();
             }
         }
     }
