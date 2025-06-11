@@ -19,17 +19,25 @@ namespace BookingService.Controllers
         [HttpPost("CreateBooking")]
         public async Task<IActionResult> CreateBooking([FromBody] BookingDto bookingDto)
         {
-            var booking = await _service.CreateBookingWithDetailsAsync(new Booking
+            if (bookingDto == null)
+                return BadRequest("bookingDto is required.");
+
+            var booking = new Booking
             {
                 UserId = bookingDto.UserId,
                 MovieId = bookingDto.MovieId,
                 TheaterId = bookingDto.TheaterId,
                 PaymentId = bookingDto.PaymentId,
                 SeatNumber = bookingDto.SeatNumber,
-                BookingTime = bookingDto.BookingTime
-            });
+                BookingTime = bookingDto.BookingTime,
+                IsCancelled = bookingDto.IsCancelled,
+                Status = bookingDto.Status
+            };
 
-            return Ok(booking);
+            var saved = await _service.CreateBookingWithDetailsAsync(booking);
+
+            var enriched = await _service.GetBookingDetailsAsync(saved.Id);
+            return Ok(enriched);
         }
 
         [HttpGet("GetBooking/{id}")]
