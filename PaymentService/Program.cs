@@ -1,33 +1,16 @@
-﻿using Booking_Service.Repositories;
-using Booking_Service.Services;
-using DBModels.Db;
-using Microsoft.EntityFrameworkCore;
-using MovieService.Repositories;
-using MovieService.Services;
+﻿using Microsoft.EntityFrameworkCore;
 using PaymentService.Repositories;
 using PaymentService.Services;
-using TheaterService.Repositories;
-using TheaterService.Services;
+using DBModels.Db;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  Register DbContext
+// Register AppDbContext with PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-//  Register HttpClient factory for DI
-builder.Services.AddHttpClient();
-
-//  Register Repositories & Services
-builder.Services.AddScoped<BookingRepository>();
-builder.Services.AddScoped<MovieRepository>();
-builder.Services.AddScoped<TheaterRepository>();
+// Register Payment-specific repository and service
 builder.Services.AddScoped<PaymentRepository>();
-
-builder.Services.AddScoped<BookingServices>();
-builder.Services.AddScoped<MovieServices>();
-builder.Services.AddScoped<TheaterServices>();
 builder.Services.AddScoped<PaymentServices>();
 
 builder.Services.AddControllers();
