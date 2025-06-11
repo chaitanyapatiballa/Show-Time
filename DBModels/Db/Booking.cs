@@ -1,18 +1,16 @@
-﻿namespace DBModels.Db
+﻿namespace DBModels.Db;
+
+public partial class Booking
 {
-    public class Booking
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public int MovieId { get; set; }
-        public int TheaterId { get; set; }
-        public string SeatNumber { get; set; } = string.Empty;
-        public DateTime BookingTime { get; set; }
-        public bool IsCancelled { get; set; }
-        public string Status { get; set; } = "Pending";
-        public int PaymentId { get; set; }
-        public Movie? Movie { get; set; }
-        public Theater? Theater { get; set; }
-        public Payment? Payment { get; set; }
-    }
+    public int Id { get; set; }
+    public string UserId { get; set; } = null!;
+    public int MovieId { get; set; }
+    public int TheaterId { get; set; }
+    public int PaymentId { get; set; }
+    public string SeatNumber { get; set; } = null!;
+    public DateTime BookingTime { get; set; }
+
+    public virtual Movie Movie { get; set; } = null!;
+    public virtual Theater Theater { get; set; } = null!;
+    public virtual Payment Payment { get; set; } = null!;
 }

@@ -30,7 +30,17 @@ namespace PaymentService.Controllers
             if (!success)
                 return BadRequest("Payment failed");
 
-            return Ok(payment);
+            var result = new PaymentDto
+            {
+                PaymentId = payment.Id,
+                UserId = payment.UserId,
+                BookingId = payment.BookingId,
+                Amount = payment.Amount,
+                PaymentTime = payment.PaymentTime,
+                IsSuccessful = payment.IsSuccessful
+            };
+
+            return Ok(result);
         }
     }
 }
