@@ -31,6 +31,7 @@ namespace BookingService.Controllers
                 SeatNumber = bookingDto.SeatNumber,
                 BookingTime = bookingDto.BookingTime,
                 IsCancelled = bookingDto.IsCancelled,
+                ShowTime = bookingDto.ShowTime,
                 Status = bookingDto.Status
             };
 
