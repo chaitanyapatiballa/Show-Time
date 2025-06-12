@@ -21,7 +21,7 @@ namespace TheaterService.Controllers
         {
             try
             {
-                var theaters = await _service.GetTheatersAsync(); 
+                var theaters = await _service.GetTheaters(); 
                 return Ok(theaters);
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace TheaterService.Controllers
         {
             try
             {
-                var theater = await _service.GetTheaterByIdAsync(id); 
+                var theater = await _service.GetTheaterById(id); 
                 if (theater == null)
                 {
                     return NotFound($"Theater with ID {id} not found.");
@@ -65,7 +65,7 @@ namespace TheaterService.Controllers
                     Capacity = theaterDto.Capacity
                 };
 
-                var addedTheater = await _service.AddTheaterAsync(theater);
+                var addedTheater = await _service.AddTheater(theater);
 
                 var resultDto = new TheaterDto
                 {
@@ -93,7 +93,7 @@ namespace TheaterService.Controllers
                 {
                     return BadRequest("Invalid theater data.");
                 }
-                var updatedTheater = await _service.UpdateTheaterAsync(theater);
+                var updatedTheater = await _service.UpdateTheater(theater);
                 if (updatedTheater == null)
                 {
                     return NotFound($"Theater with ID {theater.Id} not found.");
@@ -110,7 +110,7 @@ namespace TheaterService.Controllers
         {
             try
             {
-                var deleted = await _service.DeleteTheaterAsync(id);
+                var deleted = await _service.DeleteTheater(id);
                 if (!deleted)
                 {
                     return NotFound($"Theater with ID {id} not found.");

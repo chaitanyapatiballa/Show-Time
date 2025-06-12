@@ -12,7 +12,7 @@ namespace TheaterService.Repositories
             _context = context;
         }
 
-        public async Task<MovieTheater> AssignMovieToTheaterAsync(MovieTheater assignment)
+        public async Task<MovieTheater> AssignMovieToTheater(MovieTheater assignment)   
         {
             _context.MovieTheaters.Add(assignment);
             await _context.SaveChangesAsync();

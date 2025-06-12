@@ -12,15 +12,15 @@ namespace BookingService.Repositories
             _context = context;
         }
 
-        public async Task<Booking?> GetBookingByIdAsync(int id)
+        public async Task<Booking?> GetBookingById(int id)
         {
             return await _context.Bookings.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task<Booking> AddBookingAsync(Booking booking)
+        public async Task<Booking> AddBooking(Booking booking)
         {
             _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();  
             return booking;
         }
     }

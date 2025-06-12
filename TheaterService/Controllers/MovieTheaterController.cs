@@ -21,7 +21,7 @@ namespace TheaterService.Controllers
             if (dto.MovieId <= 0 || dto.TheaterId <= 0)
                 return BadRequest("Invalid MovieId or TheaterId.");
 
-            var result = await _service.AssignMovieToTheaterAsync(dto);
+            var result = await _service.AssignMovieToTheater(dto);
             return Ok(result);
         }
 

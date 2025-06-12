@@ -12,24 +12,24 @@ namespace MovieService.Repositories
             _context = context;
         }
 
-        public async Task<List<Movie>> GetMoviesAsync()
+        public async Task<List<Movie>> GetMovies()  
         {
             return await _context.Movies.ToListAsync();
         }
 
-        public async Task<Movie?> GetMovieByIdAsync(int id)
+        public async Task<Movie?> GetMovieById(int id)  
         {
             return await _context.Movies.FindAsync(id);
         }
 
-        public async Task<Movie> AddMovieAsync(Movie movie)
+        public async Task<Movie> AddMovie(Movie movie)  
         {
             _context.Movies.Add(movie);
             await _context.SaveChangesAsync();
             return movie;
         }
 
-        public async Task<Movie?> UpdateMovieAsync(Movie movie)
+        public async Task<Movie?> UpdateMovie(Movie movie)  
         {
             var existing = await _context.Movies.FindAsync(movie.Id);
             if (existing == null) return null;
@@ -43,7 +43,7 @@ namespace MovieService.Repositories
             return existing;
         }
 
-        public async Task<bool> DeleteMovieAsync(int id)
+        public async Task<bool> DeleteMovie(int id) 
         {
             var movie = await _context.Movies.FindAsync(id);
             if (movie == null) return false;

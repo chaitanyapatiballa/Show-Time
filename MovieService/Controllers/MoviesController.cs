@@ -22,7 +22,7 @@ namespace MovieService.Controllers
         {
             try
             {
-                var movies = await _movieService.GetMoviesAsync();
+                var movies = await _movieService.GetMovies();
                 return Ok(movies);
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace MovieService.Controllers
         {
             try
             {
-                var movie = await _movieService.GetMovieByIdAsync(id);
+                var movie = await _movieService.GetMovieById(id);
                 if (movie == null)
                     return NotFound($"Movie with ID {id} not found.");
 
@@ -67,7 +67,7 @@ namespace MovieService.Controllers
                     TheaterId = movieDto.TheaterId
                 };
 
-                var created = await _movieService.AddMovieAsync(movie);
+                var created = await _movieService.AddMovie(movie);
                 return CreatedAtAction(nameof(GetMovie), new { id = created.Id }, created);
             }
             catch (DbUpdateException ex)
@@ -100,7 +100,7 @@ namespace MovieService.Controllers
                     TheaterId = movieDto.TheaterId
                 };
 
-                var updated = await _movieService.UpdateMovieAsync(movie);
+                var updated = await _movieService.UpdateMovie(movie);
                 if (updated == null)
                     return NotFound($"Movie with ID {id} not found.");
 
@@ -121,7 +121,7 @@ namespace MovieService.Controllers
         {
             try
             {
-                var deleted = await _movieService.DeleteMovieAsync(id);
+                var deleted = await _movieService.DeleteMovie(id);
                 if (!deleted)
                     return NotFound($"Movie with ID {id} not found.");
 

@@ -11,13 +11,13 @@ namespace PaymentService.Services
             _paymentRepository = paymentRepository;
         }
 
-        public async Task<bool> ProcessPaymentAsync(Payment payment)
+        public async Task<bool> ProcessPayment(Payment payment) 
         {
 
             payment.PaymentTime = DateTime.UtcNow;
             payment.IsSuccessful = true; 
 
-            await _paymentRepository.AddPaymentAsync(payment);
+            await _paymentRepository.AddPayment(payment);   
 
             return payment.IsSuccessful;
         }

@@ -9,10 +9,10 @@ namespace PaymentService.Repositories
         {
             _context = context;
         }
-        public async Task AddPaymentAsync(Payment payment)
+        public async Task AddPayment(Payment payment)
         {
             await _context.Payments.AddAsync(payment);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();  
         }
     }
 }

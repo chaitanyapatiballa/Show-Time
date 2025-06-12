@@ -12,24 +12,24 @@ namespace TheaterService.Repositories
             _context = context;
         }
 
-        public async Task<List<Theater>> GetTheatersAsync()
+        public async Task<List<Theater>> GetTheaters()  
         {
             return await _context.Theaters.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Theater?> GetTheaterByIdAsync(int id)
+        public async Task<Theater?> GetTheaterById(int id)  
         {
             return await _context.Theaters.FindAsync(id);
         }
 
-        public async Task<Theater> AddTheaterAsync(Theater theater)
+        public async Task<Theater> AddTheater(Theater theater)  
         {
             _context.Theaters.Add(theater);
             await _context.SaveChangesAsync();
             return theater;
         }
 
-        public async Task<Theater?> UpdateTheaterAsync(Theater updated)
+        public async Task<Theater?> UpdateTheater(Theater updated)  
         {
             var existing = await _context.Theaters.FindAsync(updated.Id);
             if (existing == null) return null;
@@ -42,7 +42,7 @@ namespace TheaterService.Repositories
             return existing;
         }
 
-        public async Task<bool> DeleteTheaterAsync(int id)
+        public async Task<bool> DeleteTheater(int id)   
         {
             var theater = await _context.Theaters.FindAsync(id);
             if (theater == null) return false;

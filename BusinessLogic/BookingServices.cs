@@ -18,23 +18,23 @@ namespace BookingService.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<Booking?> CreateBookingWithDetailsAsync(Booking booking)
+        public async Task<Booking?> CreateBooking(Booking booking)
         {
-            return await _repository.AddBookingAsync(booking);
+            return await _repository.AddBooking(booking);
         }
 
-        public async Task<object?> GetBookingDetailsAsync(int bookingId)
+        public async Task<object?>  GetBookingDetails(int bookingId)
         {
-            var booking = await _repository.GetBookingByIdAsync(bookingId);
+            var booking = await _repository.GetBookingById(bookingId);
             if (booking == null) return null;
 
             var movieClient = _httpClientFactory.CreateClient("MovieService");
             var theaterClient = _httpClientFactory.CreateClient("TheaterService");
             var paymentClient = _httpClientFactory.CreateClient("PaymentService");
 
-            var movie = await GetFromServiceAsync<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
-            var theater = await GetFromServiceAsync<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
-            var payment = await GetFromServiceAsync<PaymentDto>(paymentClient, $"/api/Payments/GetPaymentByBooking/{booking.Id}");
+            var movie = await GetFromService<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
+            var theater = await GetFromService<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
+            var payment = await GetFromService<PaymentDto>(paymentClient, $"/api/Payments/GetPaymentByBooking/{booking.Id}");
 
             return new
             {
@@ -45,7 +45,7 @@ namespace BookingService.Services
             };
         }
 
-        private async Task<T?> GetFromServiceAsync<T>(HttpClient client, string path)
+        private async Task<T?> GetFromService <T>(HttpClient client, string path)
         {
             var response = await client.GetAsync(path);
             if (!response.IsSuccessStatusCode) return default;

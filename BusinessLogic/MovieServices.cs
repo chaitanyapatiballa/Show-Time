@@ -12,29 +12,29 @@ namespace MovieService.Services
             _movieRepository = movieRepository;
         }
 
-        public async Task<List<Movie>> GetMoviesAsync()
+        public async Task<List<Movie>> GetMovies ()
         {
-            return await _movieRepository.GetMoviesAsync();
+            return await _movieRepository.GetMovies();
         }
 
-        public async Task<Movie?> GetMovieByIdAsync(int id)
+        public async Task<Movie?> GetMovieById (int id)
         {
-            return await _movieRepository.GetMovieByIdAsync(id);
+            return await _movieRepository.GetMovieById (id);
+        }
+            
+        public async Task<Movie> AddMovie (Movie movie)
+        {
+            return await _movieRepository.AddMovie(movie);
         }
 
-        public async Task<Movie> AddMovieAsync(Movie movie)
+        public async Task<Movie?> UpdateMovie (Movie movie)
         {
-            return await _movieRepository.AddMovieAsync(movie);
+            return await _movieRepository.UpdateMovie (movie);
         }
 
-        public async Task<Movie?> UpdateMovieAsync(Movie movie)
+        public async Task<bool> DeleteMovie (int id)
         {
-            return await _movieRepository.UpdateMovieAsync(movie);
-        }
-
-        public async Task<bool> DeleteMovieAsync(int id)
-        {
-            return await _movieRepository.DeleteMovieAsync(id);
+            return await _movieRepository.DeleteMovie (id);
         }
     }
 }

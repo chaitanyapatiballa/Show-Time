@@ -10,25 +10,25 @@ namespace TheaterService.Services
         {
             _theaterRepository = theaterRepository;
         }
-        public async Task<List<Theater>> GetTheatersAsync()
+        public async Task<List<Theater>> GetTheaters()  
         {
-            return await _theaterRepository.GetTheatersAsync();
+            return await _theaterRepository.GetTheaters();
+        }   
+        public async Task<Theater?> GetTheaterById(int id)  
+        {
+            return await _theaterRepository.GetTheaterById(id); 
         }
-        public async Task<Theater?> GetTheaterByIdAsync(int id)
+        public async Task<Theater> AddTheater(Theater theater)  
         {
-            return await _theaterRepository.GetTheaterByIdAsync(id);
+            return await _theaterRepository.AddTheater(theater);    
         }
-        public async Task<Theater> AddTheaterAsync(Theater theater)
+        public async Task<Theater?> UpdateTheater(Theater theater)  
         {
-            return await _theaterRepository.AddTheaterAsync(theater);
+            return await _theaterRepository.UpdateTheater(theater); 
         }
-        public async Task<Theater?> UpdateTheaterAsync(Theater theater)
+        public async Task<bool> DeleteTheater(int id)   
         {
-            return await _theaterRepository.UpdateTheaterAsync(theater);
-        }
-        public async Task<bool> DeleteTheaterAsync(int id)
-        {
-            return await _theaterRepository.DeleteTheaterAsync(id);
+            return await _theaterRepository.DeleteTheater(id);  
         }
     }
 }

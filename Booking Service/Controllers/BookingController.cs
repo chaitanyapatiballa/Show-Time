@@ -34,16 +34,16 @@ namespace BookingService.Controllers
                 Status = bookingDto.Status
             };
 
-            var saved = await _service.CreateBookingWithDetailsAsync(booking);
+            var saved = await _service.CreateBooking(booking);
 
-            var enriched = await _service.GetBookingDetailsAsync(saved.Id);
+            var enriched = await _service.GetBookingDetails(saved.Id);
             return Ok(enriched);
         }
 
         [HttpGet("GetBooking/{id}")]
         public async Task<IActionResult> GetBooking(int id)
         {
-            var result = await _service.GetBookingDetailsAsync(id);
+            var result = await _service.GetBookingDetails(id);
             if (result == null)
                 return NotFound("Booking not found.");
 

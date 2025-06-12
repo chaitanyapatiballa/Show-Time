@@ -13,14 +13,14 @@ namespace TheaterService.Services
             _repository = repository;
         }
 
-        public async Task<MovieTheater> AssignMovieToTheaterAsync(MovieTheaterDto dto)
+        public async Task<MovieTheater> AssignMovieToTheater(MovieTheaterDto dto)   
         {
             var assignment = new MovieTheater
             {
                 MovieId = dto.MovieId,
                 TheaterId = dto.TheaterId
             };
-            return await _repository.AssignMovieToTheaterAsync(assignment);
+            return await _repository.AssignMovieToTheater(assignment);  
         }
 
         public async Task<List<MovieTheater>> GetAllAssignmentsAsync()

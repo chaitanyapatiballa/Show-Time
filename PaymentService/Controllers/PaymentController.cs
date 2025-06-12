@@ -26,7 +26,7 @@ namespace PaymentService.Controllers
                 Amount = dto.Amount
             };
 
-            bool success = await _service.ProcessPaymentAsync(payment);
+            bool success = await _service.ProcessPayment(payment);
             if (!success)
                 return BadRequest("Payment failed");
 
