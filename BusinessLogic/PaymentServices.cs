@@ -6,21 +6,23 @@ namespace PaymentService.Services
     public class PaymentServices
     {
         private readonly PaymentRepository _paymentRepository;
+
         public PaymentServices(PaymentRepository paymentRepository)
         {
             _paymentRepository = paymentRepository;
         }
 
-        public async Task<bool> ProcessPayment(Payment payment) 
+        public async Task<Payment> ProcessPayment(Payment payment)
         {
-
+            // Set necessary fields before saving
             payment.PaymentTime = DateTime.UtcNow;
-            payment.IsSuccessful = true; 
+            payment.IsSuccessful = true;
 
-            await _paymentRepository.AddPayment(payment);   
+            // Save to DB
+            await _paymentRepository.AddPayment(payment);
 
-            return payment.IsSuccessful;
+            // Return the full payment object (with auto-generated PaymentId)
+            return payment;
         }
-
     }
 }

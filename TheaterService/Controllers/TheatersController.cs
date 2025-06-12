@@ -85,26 +85,29 @@ namespace TheaterService.Controllers
 
 
         [HttpPut("UpdateTheater")]
-        public async Task<ActionResult<Theater>> UpdateTheater(Theater theater)
+        public async Task<ActionResult<Theater>> UpdateTheater([FromBody] TheaterDto dto)
         {
             try
             {
-                if (theater == null || theater.TheaterId <= 0 || string.IsNullOrEmpty(theater.Name) || string.IsNullOrEmpty(theater.Location) || theater.Capacity <= 0)
+                if (dto == null || dto.TheaterId <= 0 || string.IsNullOrEmpty(dto.Name) || string.IsNullOrEmpty(dto.Location) || dto.Capacity <= 0)
                 {
                     return BadRequest("Invalid theater data.");
                 }
-                var updatedTheater = await _service.UpdateTheater(theater);
-                if (updatedTheater == null)
+
+                var updated = await _service.UpdateTheater(dto);
+                if (updated == null)
                 {
-                    return NotFound($"Theater with ID {theater.TheaterId} not found.");
+                    return NotFound($"Theater with ID {dto.TheaterId} not found.");
                 }
-                return Ok(updatedTheater);
+
+                return Ok(updated);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred while updating theater: {ex.Message}");
             }
         }
+
         [HttpDelete("DeleteTheater/{id}")]
         public async Task<ActionResult> DeleteTheater(int id)
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBModels.Db
@@ -22,18 +21,21 @@ namespace DBModels.Db
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ✅ Booking Entity
             modelBuilder.Entity<Booking>(entity =>
             {
-                entity.HasKey(e => e.TheaterId);
+                entity.HasKey(e => e.BookingId);
+
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.SeatNumber).HasMaxLength(10);
                 entity.Property(e => e.Status).HasMaxLength(50);
+                entity.Property(e => e.ShowTime).IsRequired();
+                entity.Property(e => e.BookingTime).IsRequired();
 
                 entity.HasIndex(e => e.MovieId).HasDatabaseName("IX_Bookings_MovieId");
                 entity.HasIndex(e => e.TheaterId).HasDatabaseName("IX_Bookings_TheaterId");
                 entity.HasIndex(e => e.PaymentId).HasDatabaseName("IX_Bookings_PaymentId");
 
-                // Foreign keys
                 entity.HasOne(d => d.Movie)
                       .WithMany(p => p.Bookings)
                       .HasForeignKey(d => d.MovieId);
@@ -44,16 +46,19 @@ namespace DBModels.Db
 
                 entity.HasOne(d => d.Payment)
                       .WithMany()
-                      .HasForeignKey(d => d.PaymentId);
+                      .HasForeignKey(d => d.PaymentId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
+            // ✅ Movie Entity
             modelBuilder.Entity<Movie>(entity =>
             {
-                entity.HasKey(e => e.TheaterId);
+                entity.HasKey(e => e.MovieId);
                 entity.Property(e => e.Title).IsRequired();
                 entity.Property(e => e.Duration).HasMaxLength(50);
             });
 
+            // ✅ Theater Entity
             modelBuilder.Entity<Theater>(entity =>
             {
                 entity.HasKey(e => e.TheaterId);
@@ -61,6 +66,7 @@ namespace DBModels.Db
                 entity.Property(e => e.Location).IsRequired();
             });
 
+            // ✅ MovieTheater (Join Table)
             modelBuilder.Entity<MovieTheater>(entity =>
             {
                 entity.HasKey(e => new { e.MovieId, e.TheaterId });
@@ -78,9 +84,16 @@ namespace DBModels.Db
                 entity.ToTable("MovieTheaters");
             });
 
+            // ✅ Payment Entity
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
+                entity.Property(e => e.PaymentId).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.Amount).HasColumnType("decimal(10,2)");
+                entity.Property(e => e.PaymentTime).IsRequired();
+                entity.Property(e => e.IsSuccessful).IsRequired();
 
                 entity.HasIndex(e => e.BookingId)
                       .IsUnique()

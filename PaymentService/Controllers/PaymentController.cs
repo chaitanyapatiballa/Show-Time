@@ -9,38 +9,42 @@ namespace PaymentService.Controllers
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase
     {
-        private readonly PaymentServices _service;
+        private readonly AppDbContext _context;
 
-        public PaymentController(PaymentServices service)
+        public PaymentController(AppDbContext context)
         {
-            _service = service;
+            _context = context;
         }
 
         [HttpPost]
-        public async Task<IActionResult> MakePayment([FromBody] PaymentDto dto)
+        public async Task<ActionResult<PaymentDto>> CreatePayment([FromBody] PaymentDto request)
         {
+            // Validate Booking exists
+            if (!_context.Bookings.Any(b => b.BookingId == request.BookingId))
+                return NotFound("Booking not found");
+
+            // Create payment
             var payment = new Payment
             {
-                BookingId = dto.BookingId,
-                UserId = dto.UserId,
-                Amount = dto.Amount
+                BookingId = request.BookingId,
+                UserId = request.UserId,
+                Amount = request.Amount,
+                PaymentTime = DateTime.UtcNow
             };
 
-            bool success = await _service.ProcessPayment(payment);
-            if (!success)
-                return BadRequest("Payment failed");
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
 
-            var result = new PaymentDto
+            // Return with populated fields
+            return Ok(new PaymentDto
             {
                 PaymentId = payment.PaymentId,
-                UserId = payment.UserId,
                 BookingId = payment.BookingId,
+                UserId = payment.UserId,
                 Amount = payment.Amount,
-                PaymentTime = payment.PaymentTime,
-                IsSuccessful = payment.IsSuccessful
-            };
-
-            return Ok(result);
+                PaymentTime = payment.PaymentTime
+            });
         }
     }
 }
+

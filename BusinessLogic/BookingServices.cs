@@ -60,13 +60,13 @@ namespace BookingService.Services
 
         public async Task<IEnumerable<string>> GetAvailableSeats(int movieId, int theaterId, DateTime showTime)
         {
-            // Ensure the showTime is marked as UTC to match PostgreSQL expectations
             showTime = DateTime.SpecifyKind(showTime, DateTimeKind.Utc);
 
             var bookedSeats = await _repository.GetBookedSeats(movieId, theaterId, showTime);
 
-            var theaterResponse = await _httpClientFactory.CreateClient("TheaterService")
-                .GetAsync($"https://localhost:7106/api/Theaters/{theaterId}");
+            var theaterClient = _httpClientFactory.CreateClient("TheaterService");
+            var theaterResponse = await theaterClient.GetAsync($"/api/Theaters/GetTheater/{theaterId}");
+
 
             if (!theaterResponse.IsSuccessStatusCode)
                 throw new Exception("Failed to fetch theater info from TheaterService.");
@@ -80,7 +80,6 @@ namespace BookingService.Services
 
             return availableSeats;
         }
-
 
         private List<string> GenerateSeatLabels(int totalSeats)
         {
@@ -100,7 +99,7 @@ namespace BookingService.Services
             return seatLabels;
         }
 
-        public async Task<List<object>> GetBookingHistoryByUserId (int userId, DateTime? startDate, DateTime? endDate, string? status)
+        public async Task<List<object>> GetBookingHistoryByUserId(int userId, DateTime? startDate, DateTime? endDate, string? status)
         {
             var allBookings = await _repository.GetBookingsByUserId(userId);
 
@@ -147,9 +146,16 @@ namespace BookingService.Services
 
             return result;
         }
+
+        public HttpClient CreatePaymentServiceClient()
+        {
+            return _httpClientFactory.CreateClient("PaymentService");
+        }
+
+        public async Task UpdateBooking(Booking booking)
+        {
+            await _repository.UpdateBooking(booking);
+        }
+
     }
 }
-    
-
-       
-

@@ -1,4 +1,5 @@
 ﻿using DBModels.Db;
+using TheaterService.DTOs;
 using TheaterService.Repositories;
 
 namespace TheaterService.Services
@@ -22,10 +23,18 @@ namespace TheaterService.Services
         {
             return await _theaterRepository.AddTheater(theater);    
         }
-        public async Task<Theater?> UpdateTheater(Theater theater)  
+        public async Task<Theater?> UpdateTheater(TheaterDto dto)
         {
-            return await _theaterRepository.UpdateTheater(theater); 
+            var existing = await _theaterRepository.GetTheaterById(dto.TheaterId);
+            if (existing == null) return null;
+
+            existing.Name = dto.Name;
+            existing.Location = dto.Location;
+            existing.Capacity = dto.Capacity;
+
+            return await _theaterRepository.UpdateTheater(existing);
         }
+
         public async Task<bool> DeleteTheater(int id)   
         {
             return await _theaterRepository.DeleteTheater(id);  

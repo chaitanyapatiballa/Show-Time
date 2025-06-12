@@ -75,5 +75,12 @@ namespace BookingService.Repositories
                 .Where(b => b.UserId == userId)
                 .ToListAsync();
         }
+
+        public async Task UpdateBooking(Booking booking)
+        {
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

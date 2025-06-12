@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace DBModels.Db;
 
-public partial class Payment
+public class Payment
 {
     public int PaymentId { get; set; }
-        
-    public string UserId { get; set; } = null!;
-
     public int BookingId { get; set; }
-
+    public string UserId { get; set; }
     public decimal Amount { get; set; }
-
     public DateTime PaymentTime { get; set; }
-
     public bool IsSuccessful { get; set; }
+    public Booking Booking { get; set; }
 
-    public virtual Booking Booking { get; set; } = null!;
 }

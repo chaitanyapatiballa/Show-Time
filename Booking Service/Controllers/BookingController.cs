@@ -2,6 +2,7 @@
 using BookingService.Services;
 using DBModels.Db;
 using Microsoft.AspNetCore.Mvc;
+using PaymentService.DTOs;
 
 namespace BookingService.Controllers
 {
@@ -20,24 +21,46 @@ namespace BookingService.Controllers
         public async Task<IActionResult> CreateBooking([FromBody] BookingDto bookingDto)
         {
             if (bookingDto == null)
-                return BadRequest("bookingDto is required.");
+                return BadRequest("Booking data is required.");
 
+            // Step 1: Create Booking object (no PaymentId here)
             var booking = new Booking
             {
                 UserId = bookingDto.UserId,
                 MovieId = bookingDto.MovieId,
                 TheaterId = bookingDto.TheaterId,
-                PaymentId = bookingDto.PaymentId,
                 SeatNumber = bookingDto.SeatNumber,
-                BookingTime = bookingDto.BookingTime,
-                IsCancelled = bookingDto.IsCancelled,
                 ShowTime = bookingDto.ShowTime,
-                Status = bookingDto.Status
+                BookingTime = DateTime.UtcNow,
+                IsCancelled = false,
+                Status = "Confirmed"
             };
 
-            var saved = await _service.CreateBooking(booking);
-            var enriched = await _service.GetBookingDetails(saved.BookingId);
-            return Ok(enriched);
+            // Step 2: Save booking in DB
+            var savedBooking = await _service.CreateBooking(booking);
+
+            // Step 3: Call PaymentService
+            var paymentClient = _service.CreatePaymentServiceClient();
+            var paymentRequest = new PaymentDto
+            {
+                BookingId = savedBooking.BookingId,
+                UserId = savedBooking.UserId.ToString(),
+                Amount = 300.0M  // You can make this dynamic later
+            };
+
+            var paymentResponse = await paymentClient.PostAsJsonAsync("/api/Payment", paymentRequest);
+            if (!paymentResponse.IsSuccessStatusCode)
+                return StatusCode(500, "Payment failed.");
+
+            var payment = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
+
+            // Step 4: Update booking with payment id
+            savedBooking.PaymentId = payment.PaymentId;
+            await _service.UpdateBooking(savedBooking);
+
+            // Step 5: Return final booking with payment info
+            var result = await _service.GetBookingDetails(savedBooking.BookingId);
+            return Ok(result);
         }
 
         [HttpGet("GetBooking/{id}")]
@@ -46,7 +69,6 @@ namespace BookingService.Controllers
             var result = await _service.GetBookingDetails(id);
             if (result == null)
                 return NotFound("Booking not found.");
-
             return Ok(result);
         }
 
