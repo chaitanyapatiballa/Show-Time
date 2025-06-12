@@ -69,13 +69,13 @@ namespace TheaterService.Controllers
 
                 var resultDto = new TheaterDto
                 {
-                    Id = addedTheater.Id,
+                    TheaterId = addedTheater.TheaterId,
                     Name = addedTheater.Name,
                     Location = addedTheater.Location,
                     Capacity = addedTheater.Capacity
                 };
 
-                return CreatedAtAction(nameof(GetTheater), new { id = resultDto.Id }, resultDto);
+                return CreatedAtAction(nameof(GetTheater), new { id = resultDto.TheaterId }, resultDto);
             }
             catch (Exception ex)
             {
@@ -89,14 +89,14 @@ namespace TheaterService.Controllers
         {
             try
             {
-                if (theater == null || theater.Id <= 0 || string.IsNullOrEmpty(theater.Name) || string.IsNullOrEmpty(theater.Location) || theater.Capacity <= 0)
+                if (theater == null || theater.TheaterId <= 0 || string.IsNullOrEmpty(theater.Name) || string.IsNullOrEmpty(theater.Location) || theater.Capacity <= 0)
                 {
                     return BadRequest("Invalid theater data.");
                 }
                 var updatedTheater = await _service.UpdateTheater(theater);
                 if (updatedTheater == null)
                 {
-                    return NotFound($"Theater with ID {theater.Id} not found.");
+                    return NotFound($"Theater with ID {theater.TheaterId} not found.");
                 }
                 return Ok(updatedTheater);
             }

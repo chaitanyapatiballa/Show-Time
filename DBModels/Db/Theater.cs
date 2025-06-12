@@ -5,8 +5,8 @@ namespace DBModels.Db;
 
 public partial class Theater
 {
-    public int Id { get; set; }
-
+    public int TheaterId { get; set; }
+        
     public string? Name { get; set; }
 
     public string? Location { get; set; }

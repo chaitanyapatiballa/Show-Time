@@ -1,6 +1,7 @@
 ﻿using BookingService.Repositories;
 using DBModels.Db;
 using MovieService.Models;
+using Newtonsoft.Json;
 using PaymentService.DTOs;
 using System.Text.Json;
 using TheaterService.DTOs;
@@ -23,7 +24,7 @@ namespace BookingService.Services
             return await _repository.AddBooking(booking);
         }
 
-        public async Task<object?>  GetBookingDetails(int bookingId)
+        public async Task<object?> GetBookingDetails(int bookingId)
         {
             var booking = await _repository.GetBookingById(bookingId);
             if (booking == null) return null;
@@ -34,7 +35,7 @@ namespace BookingService.Services
 
             var movie = await GetFromService<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
             var theater = await GetFromService<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
-            var payment = await GetFromService<PaymentDto>(paymentClient, $"/api/Payments/GetPaymentByBooking/{booking.Id}");
+            var payment = await GetFromService<PaymentDto>(paymentClient, $"/api/Payments/GetPaymentByBooking/{booking.MovieId}");
 
             return new
             {
@@ -45,12 +46,110 @@ namespace BookingService.Services
             };
         }
 
-        private async Task<T?> GetFromService <T>(HttpClient client, string path)
+        private async Task<T?> GetFromService<T>(HttpClient client, string path)
         {
             var response = await client.GetAsync(path);
             if (!response.IsSuccessStatusCode) return default;
+
             var content = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return System.Text.Json.JsonSerializer.Deserialize<T>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
+        public async Task<IEnumerable<string>> GetAvailableSeats(int movieId, int theaterId, DateTime showTime)
+        {
+            // Ensure the showTime is marked as UTC to match PostgreSQL expectations
+            showTime = DateTime.SpecifyKind(showTime, DateTimeKind.Utc);
+
+            var bookedSeats = await _repository.GetBookedSeats(movieId, theaterId, showTime);
+
+            var theaterResponse = await _httpClientFactory.CreateClient("TheaterService")
+                .GetAsync($"https://localhost:7106/api/Theaters/{theaterId}");
+
+            if (!theaterResponse.IsSuccessStatusCode)
+                throw new Exception("Failed to fetch theater info from TheaterService.");
+
+            var theaterContent = await theaterResponse.Content.ReadAsStringAsync();
+            var theater = JsonConvert.DeserializeObject<TheaterDto>(theaterContent);
+            int capacity = theater.Capacity;
+
+            var allSeats = GenerateSeatLabels(capacity);
+            var availableSeats = allSeats.Except(bookedSeats).ToList();
+
+            return availableSeats;
+        }
+
+
+        private List<string> GenerateSeatLabels(int totalSeats)
+        {
+            var seatLabels = new List<string>();
+            int rows = (int)Math.Ceiling(totalSeats / 20.0);
+            int seatsPerRow = 20;
+            char rowChar = 'A';
+
+            for (int r = 0; r < rows && rowChar <= 'Z'; r++, rowChar++)
+            {
+                for (int s = 1; s <= seatsPerRow && seatLabels.Count < totalSeats; s++)
+                {
+                    seatLabels.Add($"{rowChar}{s}");
+                }
+            }
+
+            return seatLabels;
+        }
+
+        public async Task<List<object>> GetBookingHistoryByUserId (int userId, DateTime? startDate, DateTime? endDate, string? status)
+        {
+            var allBookings = await _repository.GetBookingsByUserId(userId);
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                allBookings = allBookings
+                    .Where(b => b.BookingTime.Date >= startDate.Value.Date && b.BookingTime.Date <= endDate.Value.Date)
+                    .ToList();
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                status = status.ToLower();
+                if (status == "successful")
+                {
+                    allBookings = allBookings.Where(b => b.Status.ToLower() == "successful").ToList();
+                }
+                else if (status == "cancelled")
+                {
+                    allBookings = allBookings.Where(b => b.Status.ToLower() == "cancelled").ToList();
+                }
+            }
+
+            var result = new List<object>();
+
+            foreach (var booking in allBookings)
+            {
+                var movieClient = _httpClientFactory.CreateClient("MovieService");
+                var theaterClient = _httpClientFactory.CreateClient("TheaterService");
+                var paymentClient = _httpClientFactory.CreateClient("PaymentService");
+
+                var movie = await GetFromService<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
+                var theater = await GetFromService<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
+                var payment = await GetFromService<PaymentDto>(paymentClient, $"/api/Payments/GetPaymentByBooking/{booking.MovieId}");
+
+                result.Add(new
+                {
+                    Booking = booking,
+                    Movie = movie,
+                    Theater = theater,
+                    Payment = payment
+                });
+            }
+
+            return result;
         }
     }
 }
+    
+
+       
+

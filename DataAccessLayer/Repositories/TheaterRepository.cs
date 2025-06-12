@@ -31,7 +31,7 @@ namespace TheaterService.Repositories
 
         public async Task<Theater?> UpdateTheater(Theater updated)  
         {
-            var existing = await _context.Theaters.FindAsync(updated.Id);
+            var existing = await _context.Theaters.FindAsync(updated.TheaterId);
             if (existing == null) return null;
 
             existing.Name = updated.Name;

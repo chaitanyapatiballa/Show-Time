@@ -35,8 +35,7 @@ namespace BookingService.Controllers
             };
 
             var saved = await _service.CreateBooking(booking);
-
-            var enriched = await _service.GetBookingDetails(saved.Id);
+            var enriched = await _service.GetBookingDetails(saved.BookingId);
             return Ok(enriched);
         }
 
@@ -48,6 +47,38 @@ namespace BookingService.Controllers
                 return NotFound("Booking not found.");
 
             return Ok(result);
+        }
+
+        [HttpGet("available-seats")]
+        public async Task<ActionResult<IEnumerable<string>>> GetAvailableSeats(int movieId, int theaterId, DateTime showTime)
+        {
+            try
+            {
+                var seats = await _service.GetAvailableSeats(movieId, theaterId, showTime);
+                return Ok(seats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error fetching available seats: {ex.Message}");
+            }
+        }
+
+        [HttpGet("GetBookingHistoryByUserId")]
+        public async Task<IActionResult> GetBookingHistoryByUserId(
+            int userId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string? status)
+        {
+            try
+            {
+                var result = await _service.GetBookingHistoryByUserId(userId, startDate, endDate, status);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving booking history: {ex.Message}");
+            }
         }
     }
 }

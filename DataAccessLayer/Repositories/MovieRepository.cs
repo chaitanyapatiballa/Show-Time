@@ -31,7 +31,7 @@ namespace MovieService.Repositories
 
         public async Task<Movie?> UpdateMovie(Movie movie)  
         {
-            var existing = await _context.Movies.FindAsync(movie.Id);
+            var existing = await _context.Movies.FindAsync(movie.MovieId);
             if (existing == null) return null;
 
             existing.Title = movie.Title;

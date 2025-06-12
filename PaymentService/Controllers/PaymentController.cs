@@ -32,7 +32,7 @@ namespace PaymentService.Controllers
 
             var result = new PaymentDto
             {
-                PaymentId = payment.Id,
+                PaymentId = payment.PaymentId,
                 UserId = payment.UserId,
                 BookingId = payment.BookingId,
                 Amount = payment.Amount,

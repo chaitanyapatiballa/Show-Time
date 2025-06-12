@@ -5,8 +5,8 @@ namespace DBModels.Db;
 
 public partial class Payment
 {
-    public int Id { get; set; }
-
+    public int PaymentId { get; set; }
+        
     public string UserId { get; set; } = null!;
 
     public int BookingId { get; set; }

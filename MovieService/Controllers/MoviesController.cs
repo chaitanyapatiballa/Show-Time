@@ -68,7 +68,7 @@ namespace MovieService.Controllers
                 };
 
                 var created = await _movieService.AddMovie(movie);
-                return CreatedAtAction(nameof(GetMovie), new { id = created.Id }, created);
+                return CreatedAtAction(nameof(GetMovie), new { id = created.MovieId }, created);
             }
             catch (DbUpdateException ex)
             {
@@ -93,7 +93,7 @@ namespace MovieService.Controllers
 
                 var movie = new Movie
                 {
-                    Id = id,
+                    MovieId = id,
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
                     Duration = movieDto.Duration,

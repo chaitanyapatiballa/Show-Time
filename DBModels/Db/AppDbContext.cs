@@ -24,7 +24,7 @@ namespace DBModels.Db
         {
             modelBuilder.Entity<Booking>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.TheaterId);
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.SeatNumber).HasMaxLength(10);
                 entity.Property(e => e.Status).HasMaxLength(50);
@@ -49,14 +49,14 @@ namespace DBModels.Db
 
             modelBuilder.Entity<Movie>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.TheaterId);
                 entity.Property(e => e.Title).IsRequired();
                 entity.Property(e => e.Duration).HasMaxLength(50);
             });
 
             modelBuilder.Entity<Theater>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.TheaterId);
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Location).IsRequired();
             });
@@ -80,7 +80,7 @@ namespace DBModels.Db
 
             modelBuilder.Entity<Payment>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(e => e.PaymentId);
 
                 entity.HasIndex(e => e.BookingId)
                       .IsUnique()

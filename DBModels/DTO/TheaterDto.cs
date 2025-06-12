@@ -4,7 +4,7 @@ namespace TheaterService.DTOs
 {
     public class TheaterDto
     {
-        public int Id { get; set; }
+        public int TheaterId { get; set; }
 
         [Required]
         [StringLength(100)]
