@@ -25,7 +25,7 @@ namespace DBModels.Db
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=ShowtimeMovies;Username=postgres;Password=Admin");
+                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=showtime_db;Username=postgres;Password=Admin");
             }
         }
 

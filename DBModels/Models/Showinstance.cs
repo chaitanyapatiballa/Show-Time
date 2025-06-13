@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace DBModels.Models;
+
+public partial class Showinstance
+{
+    public int Showinstanceid { get; set; }
+
+    public int? Showtemplateid { get; set; }
+
+    public DateOnly? Showdate { get; set; }
+
+    public TimeOnly? Showtime { get; set; }
+
+    public int? Availableseats { get; set; }
+
+    public virtual Showtemplate? Showtemplate { get; set; }
+}
