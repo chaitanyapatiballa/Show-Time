@@ -44,8 +44,8 @@ namespace BookingService.Controllers
             var paymentRequest = new PaymentDto
             {
                 BookingId = savedBooking.BookingId,
-                UserId = savedBooking.UserId.ToString(),
-                Amount = 300.0M  // You can make this dynamic later
+                UserId = savedBooking.UserId, 
+                AmountPaid = 300.0M  
             };
 
             var paymentResponse = await paymentClient.PostAsJsonAsync("/api/Payment", paymentRequest);

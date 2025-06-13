@@ -1,8 +1,11 @@
-﻿using BookingService.Repositories;
+﻿using BookingService.DTOs;
+using BookingService.Repositories;
 using DBModels.Db;
+using DBModels.Dto;
 using MovieService.Models;
 using Newtonsoft.Json;
 using PaymentService.DTOs;
+using System.Net.Http.Json;
 using System.Text.Json;
 using TheaterService.DTOs;
 
@@ -99,7 +102,7 @@ namespace BookingService.Services
             return seatLabels;
         }
 
-        public async Task<List<object>> GetBookingHistoryByUserId(int userId,  string? status)
+        public async Task<List<object>> GetBookingHistoryByUserId(int userId, string? status)
         {
             var allBookings = await _repository.GetBookingsByUserId(userId);
 
@@ -157,5 +160,53 @@ namespace BookingService.Services
             await _repository.UpdateBooking(booking);
         }
 
+        public async Task<Booking?> CreateBookingWithBilling(BookingDto dto)
+        {
+            var booking = new Booking
+            {
+                UserId = dto.UserId,
+                MovieId = dto.MovieId,
+                TheaterId = dto.TheaterId,
+                SeatNumber = dto.SeatNumber,
+                ShowTime = dto.ShowTime,
+                BookingTime = DateTime.UtcNow,
+                IsCancelled = false,
+                Status = "Confirmed"
+            };
+
+            var savedBooking = await _repository.AddBooking(booking);
+
+            // 🔹 Call ShowService to get ShowId (based on Movie + Theater + Time)
+            var showClient = _httpClientFactory.CreateClient("ShowService");
+            var show = await GetFromService<ShowDto>(showClient, $"/api/Shows/GetShow?movieId={dto.MovieId}&theaterId={dto.TheaterId}&showTime={dto.ShowTime:O}");
+            if (show == null)
+                throw new Exception("Show not found.");
+
+            int showId = show.ShowId;
+
+            // 🔹 Call BillingSummaryController to generate billing (delegated to PaymentService)
+            var paymentClient = _httpClientFactory.CreateClient("PaymentService");
+            var billingResponse = await paymentClient.PostAsync($"/api/BillingSummary/generate?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={dto.PaymentMethod ?? "cash"}", null);
+            if (!billingResponse.IsSuccessStatusCode)
+                throw new Exception("Billing generation failed.");
+
+            // 🔹 Save billing summary into local DB for unified view 
+            var billingData = await billingResponse.Content.ReadFromJsonAsync<BillingSummary>();
+            if (billingData != null)
+            {
+                await _repository.SaveBillingSummary(billingData);
+            }
+
+            // 🔹 Call Payment endpoint in PaymentService
+            var paymentResponse = await paymentClient.PostAsync($"/api/Payment/make-payment?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={dto.PaymentMethod ?? "cash"}", null);
+            if (!paymentResponse.IsSuccessStatusCode)
+                throw new Exception("Payment failed.");
+
+            var payment = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
+            savedBooking.PaymentId = payment.PaymentId;
+
+            await _repository.UpdateBooking(savedBooking);
+            return savedBooking;
+        }
     }
 }

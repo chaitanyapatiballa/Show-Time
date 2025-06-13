@@ -1,28 +1,38 @@
 ﻿using DBModels.Db;
 using PaymentService.Repositories;
 
-namespace PaymentService.Services
+namespace PaymentService.Services  
 {
-    public class PaymentServices
+    public class PaymentService
     {
-        private readonly PaymentRepository _paymentRepository;
+        private readonly PaymentRepository _repo;
+        private readonly BillingSummaryService _billingService;
 
-        public PaymentServices(PaymentRepository paymentRepository)
+        public PaymentService(PaymentRepository repo, BillingSummaryService billingService)
         {
-            _paymentRepository = paymentRepository;
+            _repo = repo;
+            _billingService = billingService;
         }
 
-        public async Task<Payment> ProcessPayment(Payment payment)
+        public async Task<Payment> MakePaymentAsync(int bookingId, int showId, string paymentMethod)
         {
-            // Set necessary fields before saving
-            payment.PaymentTime = DateTime.UtcNow;
-            payment.IsSuccessful = true;
+            var billing = await _billingService.CreateAsync(bookingId, showId, paymentMethod);
 
-            // Save to DB
-            await _paymentRepository.AddPayment(payment);
+            var payment = new Payment
+            {
+                BookingId = bookingId,
+                AmountPaid = billing.FinalAmount,
+                PaymentMethod = paymentMethod,
+                PaymentDate = DateTime.UtcNow
+            };
 
-            // Return the full payment object (with auto-generated PaymentId)
-            return payment;
+            return await _repo.AddAsync(payment);
         }
+
+        public async Task<Payment?> GetPaymentByBookingIdAsync(int bookingId)
+        {
+            return await _repo.GetByBookingIdAsync(bookingId);
+        }
+
     }
 }

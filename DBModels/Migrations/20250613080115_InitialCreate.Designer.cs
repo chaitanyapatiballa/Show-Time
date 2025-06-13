@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DBModels.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250610073816_InitialCreate_v2")]
-    partial class InitialCreate_v2
+    [Migration("20250613080115_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,13 +25,44 @@ namespace DBModels.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DBModels.Db.Booking", b =>
+            modelBuilder.Entity("DBModels.Db.BillingSummary", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BasePrice")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FinalAmount")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("GST")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("ServiceFee")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BillingSummaries");
+                });
+
+            modelBuilder.Entity("DBModels.Db.Booking", b =>
+                {
+                    b.Property<int>("BookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BookingId"));
 
                     b.Property<DateTime>("BookingTime")
                         .HasColumnType("timestamp with time zone");
@@ -42,11 +73,21 @@ namespace DBModels.Migrations
                     b.Property<int>("MovieId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SeatNumber")
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("SeatNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTime>("ShowTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("TheaterId")
                         .HasColumnType("integer");
@@ -54,9 +95,12 @@ namespace DBModels.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("BookingId");
 
                     b.HasIndex("MovieId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
 
                     b.HasIndex("TheaterId");
 
@@ -65,22 +109,26 @@ namespace DBModels.Migrations
 
             modelBuilder.Entity("DBModels.Db.Movie", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("MovieId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MovieId"));
 
-                    b.Property<int>("Duration")
-                        .HasColumnType("integer");
+                    b.Property<string>("Duration")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Genre")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("MovieId");
 
                     b.ToTable("Movies");
                 });
@@ -97,19 +145,19 @@ namespace DBModels.Migrations
 
                     b.HasIndex("TheaterId");
 
-                    b.ToTable("MovieTheaters");
+                    b.ToTable("MovieTheaters", (string)null);
                 });
 
             modelBuilder.Entity("DBModels.Db.Payment", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PaymentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("BookingId")
                         .HasColumnType("integer");
@@ -117,14 +165,21 @@ namespace DBModels.Migrations
                     b.Property<bool>("IsSuccessful")
                         .HasColumnType("boolean");
 
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime>("PaymentTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("PaymentId");
 
                     b.HasIndex("BookingId")
                         .IsUnique();
@@ -132,24 +187,48 @@ namespace DBModels.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("DBModels.Db.Theater", b =>
+            modelBuilder.Entity("DBModels.Db.Show", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ShowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ShowId"));
+
+                    b.Property<int>("MovieId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TheaterId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TicketPrice")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("ShowId");
+
+                    b.ToTable("Shows");
+                });
+
+            modelBuilder.Entity("DBModels.Db.Theater", b =>
+                {
+                    b.Property<int>("TheaterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TheaterId"));
 
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
 
                     b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("TheaterId");
 
                     b.ToTable("Theaters");
                 });
@@ -157,13 +236,13 @@ namespace DBModels.Migrations
             modelBuilder.Entity("DBModels.Db.Booking", b =>
                 {
                     b.HasOne("DBModels.Db.Movie", "Movie")
-                        .WithMany()
+                        .WithMany("Bookings")
                         .HasForeignKey("MovieId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DBModels.Db.Theater", "Theater")
-                        .WithMany()
+                        .WithMany("Bookings")
                         .HasForeignKey("TheaterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -205,16 +284,21 @@ namespace DBModels.Migrations
 
             modelBuilder.Entity("DBModels.Db.Booking", b =>
                 {
-                    b.Navigation("Payment");
+                    b.Navigation("Payment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DBModels.Db.Movie", b =>
                 {
+                    b.Navigation("Bookings");
+
                     b.Navigation("MovieTheaters");
                 });
 
             modelBuilder.Entity("DBModels.Db.Theater", b =>
                 {
+                    b.Navigation("Bookings");
+
                     b.Navigation("MovieTheaters");
                 });
 #pragma warning restore 612, 618

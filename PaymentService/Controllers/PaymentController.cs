@@ -1,5 +1,4 @@
-﻿using DBModels.Db;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
 using PaymentService.Services;
 
@@ -9,40 +8,50 @@ namespace PaymentService.Controllers
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly PaymentService.Services.PaymentService _paymentService;
 
-        public PaymentController(AppDbContext context)
+        public PaymentController(PaymentService.Services.PaymentService paymentService)
         {
-            _context = context;
+            _paymentService = paymentService;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<PaymentDto>> CreatePayment([FromBody] PaymentDto request)
+        [HttpPost("make-payment")]
+        public async Task<IActionResult> MakePayment([FromQuery] int bookingId, [FromQuery] int showId, [FromQuery] string paymentMethod = "cash")
         {
-            // Validate Booking exists
-            if (!_context.Bookings.Any(b => b.BookingId == request.BookingId))
-                return NotFound("Booking not found");
-
-            // Create payment
-            var payment = new Payment
+            try
             {
-                BookingId = request.BookingId,
-                UserId = request.UserId,
-                Amount = request.Amount,
-                PaymentTime = DateTime.UtcNow
-            };
+                var payment = await _paymentService.MakePaymentAsync(bookingId, showId, paymentMethod);
+                return Ok(new PaymentDto
+                {
+                    PaymentId = payment.PaymentId,
+                    BookingId = payment.BookingId,
+                    AmountPaid = payment.AmountPaid,
+                    PaymentMethod = payment.PaymentMethod,
+                    PaymentDate = payment.PaymentDate,
+                    UserId = payment.UserId
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Payment failed", error = ex.Message });
+            }
+        }
 
-            _context.Payments.Add(payment);
-            await _context.SaveChangesAsync();
+        [HttpGet("GetPaymentByBooking/{bookingId}")]
+        public async Task<IActionResult> GetPaymentByBooking([FromRoute] int bookingId)
+        {
+            var payment = await _paymentService.GetPaymentByBookingIdAsync(bookingId);
+            if (payment == null)
+                return NotFound();
 
-            // Return with populated fields
             return Ok(new PaymentDto
             {
                 PaymentId = payment.PaymentId,
                 BookingId = payment.BookingId,
-                UserId = payment.UserId,
-                Amount = payment.Amount,
-                PaymentTime = payment.PaymentTime
+                AmountPaid = payment.AmountPaid,
+                PaymentMethod = payment.PaymentMethod,
+                PaymentDate = payment.PaymentDate,
+                UserId = payment.UserId
             });
         }
     }

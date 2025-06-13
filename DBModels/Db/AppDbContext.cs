@@ -15,6 +15,10 @@ namespace DBModels.Db
         public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<Theater> Theaters { get; set; } = null!;
         public virtual DbSet<MovieTheater> MovieTheaters { get; set; } = null!;
+        public DbSet<BillingSummary> BillingSummaries { get; set; }
+        public DbSet<Show> Shows { get; set; }
+
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -101,22 +105,30 @@ namespace DBModels.Db
                 entity.HasKey(e => e.PaymentId);
 
                 entity.Property(e => e.PaymentId).ValueGeneratedOnAdd();
-                entity.Property(e => e.UserId).IsRequired();
-                entity.Property(e => e.Amount).HasColumnType("decimal(10,2)");
-                entity.Property(e => e.PaymentTime).IsRequired();
-                entity.Property(e => e.IsSuccessful).IsRequired();
 
-                entity.HasIndex(e => e.BookingId).IsUnique();
+                entity.Property(e => e.UserId)
+                      .IsRequired();
 
-                entity.HasOne(p => p.Booking)
+                entity.Property(e => e.AmountPaid)
+                      .HasColumnType("decimal(10,2)")
+                      .IsRequired();
+
+                entity.Property(e => e.PaymentDate) 
+                      .IsRequired();
+
+                entity.Property(e => e.PaymentMethod)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.HasIndex(e => e.BookingId)
+                      .IsUnique();
+
+                entity.HasOne(p => p.Booking)   
                       .WithOne(b => b.Payment)
                       .HasForeignKey<Payment>(p => p.BookingId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

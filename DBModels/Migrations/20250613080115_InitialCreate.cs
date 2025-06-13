@@ -13,63 +13,98 @@ namespace DBModels.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Movies",
+                name: "BillingSummaries",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "text", nullable: true),
-                    Genre = table.Column<string>(type: "text", nullable: true),
-                    Duration = table.Column<int>(type: "integer", nullable: false)
+                    BookingId = table.Column<int>(type: "integer", nullable: false),
+                    BasePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
+                    GST = table.Column<decimal>(type: "numeric", nullable: false),
+                    ServiceFee = table.Column<decimal>(type: "numeric", nullable: false),
+                    FinalAmount = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Movies", x => x.Id);
+                    table.PrimaryKey("PK_BillingSummaries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Movies",
+                columns: table => new
+                {
+                    MovieId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Duration = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Genre = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Movies", x => x.MovieId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Shows",
+                columns: table => new
+                {
+                    ShowId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    MovieId = table.Column<int>(type: "integer", nullable: false),
+                    TheaterId = table.Column<int>(type: "integer", nullable: false),
+                    TicketPrice = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shows", x => x.ShowId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Theaters",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    TheaterId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Location = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: false),
                     Capacity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Theaters", x => x.Id);
+                    table.PrimaryKey("PK_Theaters", x => x.TheaterId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Bookings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    BookingId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     MovieId = table.Column<int>(type: "integer", nullable: false),
                     TheaterId = table.Column<int>(type: "integer", nullable: false),
-                    SeatNumber = table.Column<int>(type: "integer", nullable: true),
+                    PaymentId = table.Column<int>(type: "integer", nullable: true),
+                    SeatNumber = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ShowTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     BookingTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsCancelled = table.Column<bool>(type: "boolean", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
+                    IsCancelled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.PrimaryKey("PK_Bookings", x => x.BookingId);
                     table.ForeignKey(
                         name: "FK_Bookings_Movies_MovieId",
                         column: x => x.MovieId,
                         principalTable: "Movies",
-                        principalColumn: "Id",
+                        principalColumn: "MovieId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Bookings_Theaters_TheaterId",
                         column: x => x.TheaterId,
                         principalTable: "Theaters",
-                        principalColumn: "Id",
+                        principalColumn: "TheaterId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -87,13 +122,13 @@ namespace DBModels.Migrations
                         name: "FK_MovieTheaters_Movies_MovieId",
                         column: x => x.MovieId,
                         principalTable: "Movies",
-                        principalColumn: "Id",
+                        principalColumn: "MovieId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MovieTheaters_Theaters_TheaterId",
                         column: x => x.TheaterId,
                         principalTable: "Theaters",
-                        principalColumn: "Id",
+                        principalColumn: "TheaterId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -101,22 +136,24 @@ namespace DBModels.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    PaymentId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<string>(type: "text", nullable: false),
                     BookingId = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    AmountPaid = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     PaymentTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsSuccessful = table.Column<bool>(type: "boolean", nullable: false)
+                    IsSuccessful = table.Column<bool>(type: "boolean", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payments", x => x.Id);
+                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
                     table.ForeignKey(
                         name: "FK_Payments_Bookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "Bookings",
-                        principalColumn: "Id",
+                        principalColumn: "BookingId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -124,6 +161,12 @@ namespace DBModels.Migrations
                 name: "IX_Bookings_MovieId",
                 table: "Bookings",
                 column: "MovieId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_PaymentId",
+                table: "Bookings",
+                column: "PaymentId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_TheaterId",
@@ -146,10 +189,16 @@ namespace DBModels.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "BillingSummaries");
+
+            migrationBuilder.DropTable(
                 name: "MovieTheaters");
 
             migrationBuilder.DropTable(
                 name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "Shows");
 
             migrationBuilder.DropTable(
                 name: "Bookings");
