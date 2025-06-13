@@ -15,21 +15,21 @@ namespace TheaterService.Controllers
             _service = service;
         }
 
-        [HttpPost("Assign")]
+        [HttpPost("assign")]
         public async Task<IActionResult> AssignMovieToTheater([FromBody] MovieTheaterDto dto)
         {
             if (dto.MovieId <= 0 || dto.TheaterId <= 0)
-                return BadRequest("Invalid MovieId or TheaterId.");
+                return BadRequest("Invalid movie or theater ID.");
 
             var result = await _service.AssignMovieToTheater(dto);
             return Ok(result);
         }
 
-        [HttpGet("AllAssignments")]
+        [HttpGet]
         public async Task<IActionResult> GetAllAssignments()
         {
-            var result = await _service.GetAllAssignmentsAsync();
-            return Ok(result);
+            var assignments = await _service.GetAllAssignments();
+            return Ok(assignments);
         }
     }
 }

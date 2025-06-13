@@ -23,7 +23,7 @@ namespace BookingService.Controllers
             if (bookingDto == null)
                 return BadRequest("Booking data is required.");
 
-            // Step 1: Create Booking object (no PaymentId here)
+            //  Create Booking object (no PaymentId here)
             var booking = new Booking
             {
                 UserId = bookingDto.UserId,
@@ -36,10 +36,10 @@ namespace BookingService.Controllers
                 Status = "Confirmed"
             };
 
-            // Step 2: Save booking in DB
+            //  Save booking in DB
             var savedBooking = await _service.CreateBooking(booking);
 
-            // Step 3: Call PaymentService
+            //  Call PaymentService
             var paymentClient = _service.CreatePaymentServiceClient();
             var paymentRequest = new PaymentDto
             {
@@ -54,11 +54,11 @@ namespace BookingService.Controllers
 
             var payment = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
 
-            // Step 4: Update booking with payment id
+            //  Update booking with payment id
             savedBooking.PaymentId = payment.PaymentId;
             await _service.UpdateBooking(savedBooking);
 
-            // Step 5: Return final booking with payment info
+            //  Return final booking with payment info
             var result = await _service.GetBookingDetails(savedBooking.BookingId);
             return Ok(result);
         }
@@ -87,15 +87,14 @@ namespace BookingService.Controllers
         }
 
         [HttpGet("GetBookingHistoryByUserId")]
-        public async Task<IActionResult> GetBookingHistoryByUserId(
-            int userId,
-            [FromQuery] DateTime? startDate,
-            [FromQuery] DateTime? endDate,
-            [FromQuery] string? status)
+        public async Task<IActionResult> GetBookingHistoryByUserId( int userId, [FromQuery] string? status)
+            //[FromQuery] DateTime? startDate,
+            //[FromQuery] DateTime? endDate,
+            
         {
             try
             {
-                var result = await _service.GetBookingHistoryByUserId(userId, startDate, endDate, status);
+                var result = await _service.GetBookingHistoryByUserId(userId, status);
                 return Ok(result);
             }
             catch (Exception ex)

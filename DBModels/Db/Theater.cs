@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace DBModels.Db;
 
-public partial class Theater
+public class Theater
 {
     public int TheaterId { get; set; }
-        
-    public string? Name { get; set; }
-
-    public string? Location { get; set; }
-
+    public string Name { get; set; }
+    public string Location { get; set; }
     public int Capacity { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-
-    public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
-
 }

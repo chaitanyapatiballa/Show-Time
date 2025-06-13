@@ -10,18 +10,23 @@ namespace DBModels.Db
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
-        public virtual DbSet<Booking> Bookings { get; set; }
-        public virtual DbSet<Movie> Movies { get; set; }
-        public virtual DbSet<Payment> Payments { get; set; }
-        public virtual DbSet<Theater> Theaters { get; set; }
-        public virtual DbSet<MovieTheater> MovieTheaters { get; set; }
+        public virtual DbSet<Booking> Bookings { get; set; } = null!;
+        public virtual DbSet<Movie> Movies { get; set; } = null!;
+        public virtual DbSet<Payment> Payments { get; set; } = null!;
+        public virtual DbSet<Theater> Theaters { get; set; } = null!;
+        public virtual DbSet<MovieTheater> MovieTheaters { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=ShowtimeMovies;Username=postgres;Password=Admin");
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=ShowtimeMovies;Username=postgres;Password=Admin");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ✅ Booking Entity
+            // ✅ Booking
             modelBuilder.Entity<Booking>(entity =>
             {
                 entity.HasKey(e => e.BookingId);
@@ -32,17 +37,19 @@ namespace DBModels.Db
                 entity.Property(e => e.ShowTime).IsRequired();
                 entity.Property(e => e.BookingTime).IsRequired();
 
-                entity.HasIndex(e => e.MovieId).HasDatabaseName("IX_Bookings_MovieId");
-                entity.HasIndex(e => e.TheaterId).HasDatabaseName("IX_Bookings_TheaterId");
-                entity.HasIndex(e => e.PaymentId).HasDatabaseName("IX_Bookings_PaymentId");
+                entity.HasIndex(e => e.MovieId);
+                entity.HasIndex(e => e.TheaterId);
+                entity.HasIndex(e => e.PaymentId);
 
                 entity.HasOne(d => d.Movie)
                       .WithMany(p => p.Bookings)
-                      .HasForeignKey(d => d.MovieId);
+                      .HasForeignKey(d => d.MovieId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Theater)
                       .WithMany(p => p.Bookings)
-                      .HasForeignKey(d => d.TheaterId);
+                      .HasForeignKey(d => d.TheaterId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(d => d.Payment)
                       .WithMany()
@@ -50,15 +57,16 @@ namespace DBModels.Db
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ✅ Movie Entity
+            // ✅ Movie
             modelBuilder.Entity<Movie>(entity =>
             {
                 entity.HasKey(e => e.MovieId);
+
                 entity.Property(e => e.Title).IsRequired();
                 entity.Property(e => e.Duration).HasMaxLength(50);
             });
 
-            // ✅ Theater Entity
+            // ✅ Theater
             modelBuilder.Entity<Theater>(entity =>
             {
                 entity.HasKey(e => e.TheaterId);
@@ -66,42 +74,44 @@ namespace DBModels.Db
                 entity.Property(e => e.Location).IsRequired();
             });
 
-            // ✅ MovieTheater (Join Table)
+
+            // ✅ MovieTheater (many-to-many)
             modelBuilder.Entity<MovieTheater>(entity =>
             {
                 entity.HasKey(e => new { e.MovieId, e.TheaterId });
 
-                entity.HasIndex(e => e.TheaterId).HasDatabaseName("IX_MovieTheaters_TheaterId");
+                entity.HasIndex(e => e.TheaterId);
 
                 entity.HasOne(mt => mt.Movie)
                       .WithMany(m => m.MovieTheaters)
-                      .HasForeignKey(mt => mt.MovieId);
+                      .HasForeignKey(mt => mt.MovieId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(mt => mt.Theater)
                       .WithMany(t => t.MovieTheaters)
-                      .HasForeignKey(mt => mt.TheaterId);
+                      .HasForeignKey(mt => mt.TheaterId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
                 entity.ToTable("MovieTheaters");
             });
 
-            // ✅ Payment Entity
+            // ✅ Payment
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(e => e.PaymentId);
-                entity.Property(e => e.PaymentId).ValueGeneratedOnAdd();
 
+                entity.Property(e => e.PaymentId).ValueGeneratedOnAdd();
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.Amount).HasColumnType("decimal(10,2)");
                 entity.Property(e => e.PaymentTime).IsRequired();
                 entity.Property(e => e.IsSuccessful).IsRequired();
 
-                entity.HasIndex(e => e.BookingId)
-                      .IsUnique()
-                      .HasDatabaseName("IX_Payments_BookingId");
+                entity.HasIndex(e => e.BookingId).IsUnique();
 
                 entity.HasOne(p => p.Booking)
                       .WithOne(b => b.Payment)
-                      .HasForeignKey<Payment>(p => p.BookingId);
+                      .HasForeignKey<Payment>(p => p.BookingId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             OnModelCreatingPartial(modelBuilder);
@@ -110,4 +120,3 @@ namespace DBModels.Db
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
-

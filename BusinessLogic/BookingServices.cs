@@ -99,23 +99,23 @@ namespace BookingService.Services
             return seatLabels;
         }
 
-        public async Task<List<object>> GetBookingHistoryByUserId(int userId, DateTime? startDate, DateTime? endDate, string? status)
+        public async Task<List<object>> GetBookingHistoryByUserId(int userId,  string? status)
         {
             var allBookings = await _repository.GetBookingsByUserId(userId);
 
-            if (startDate.HasValue && endDate.HasValue)
-            {
-                allBookings = allBookings
-                    .Where(b => b.BookingTime.Date >= startDate.Value.Date && b.BookingTime.Date <= endDate.Value.Date)
-                    .ToList();
-            }
+            //if (startDate.HasValue && endDate.HasValue)
+            //{
+            //    allBookings = allBookings
+            //        .Where(b => b.BookingTime.Date >= startDate.Value.Date && b.BookingTime.Date <= endDate.Value.Date)
+            //        .ToList();
+            //}
 
             if (!string.IsNullOrEmpty(status))
             {
                 status = status.ToLower();
-                if (status == "successful")
+                if (status == "Confirmed")
                 {
-                    allBookings = allBookings.Where(b => b.Status.ToLower() == "successful").ToList();
+                    allBookings = allBookings.Where(b => b.Status.ToLower() == "Confirmed").ToList();
                 }
                 else if (status == "cancelled")
                 {

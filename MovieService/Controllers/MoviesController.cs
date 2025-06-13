@@ -53,8 +53,8 @@ namespace MovieService.Controllers
         {
             try
             {
-                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) ||
-                    string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
+                if (movieDto == null || string.IsNullOrWhiteSpace(movieDto.Title) ||
+                    string.IsNullOrWhiteSpace(movieDto.Genre) || string.IsNullOrWhiteSpace(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }
@@ -63,8 +63,7 @@ namespace MovieService.Controllers
                 {
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
-                    Duration = movieDto.Duration,
-                    TheaterId = movieDto.TheaterId
+                    Duration = movieDto.Duration
                 };
 
                 var created = await _movieService.AddMovie(movie);
@@ -85,8 +84,8 @@ namespace MovieService.Controllers
         {
             try
             {
-                if (movieDto == null || string.IsNullOrEmpty(movieDto.Title) ||
-                    string.IsNullOrEmpty(movieDto.Genre) || string.IsNullOrEmpty(movieDto.Duration))
+                if (movieDto == null || string.IsNullOrWhiteSpace(movieDto.Title) ||
+                    string.IsNullOrWhiteSpace(movieDto.Genre) || string.IsNullOrWhiteSpace(movieDto.Duration))
                 {
                     return BadRequest("Invalid movie data.");
                 }
@@ -96,8 +95,7 @@ namespace MovieService.Controllers
                     MovieId = id,
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
-                    Duration = movieDto.Duration,
-                    TheaterId = movieDto.TheaterId
+                    Duration = movieDto.Duration
                 };
 
                 var updated = await _movieService.UpdateMovie(movie);
@@ -138,7 +136,3 @@ namespace MovieService.Controllers
         }
     }
 }
-
-
-
-
