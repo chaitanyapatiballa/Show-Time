@@ -1,4 +1,5 @@
-﻿using DBModels.Db;
+﻿using BusinessLogic;
+using DBModels.Db;
 using PaymentService.Repositories;
 
 namespace PaymentService.Services  

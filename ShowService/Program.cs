@@ -1,26 +1,19 @@
-﻿using BusinessLogic;
+using BusinessLogic;
 using DataAccessLayer.Repositories;
 using DBModels.Db;
 using Microsoft.EntityFrameworkCore;
-using PaymentService.Repositories;
-using PaymentService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  Register DbContext
+// DB
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//  Register repositories
-builder.Services.AddScoped<PaymentRepository>();
-builder.Services.AddScoped<BillingSummaryRepository>(); 
+// DI
+builder.Services.AddScoped<ShowRepository>();
+builder.Services.AddScoped<ShowManager>();
 
-//  Register services
-builder.Services.AddScoped<BillingSummaryService>();
-builder.Services.AddScoped<PaymentService.Services.PaymentService>();
-
-builder.Services.AddHttpClient();
-
+// API
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

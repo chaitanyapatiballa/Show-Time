@@ -3,73 +3,83 @@ using DBModels.Db;
 using DBModels.Dto;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using System.Net.Http;
+using System.Threading.Tasks;
 
-public class BillingSummaryService
+namespace BusinessLogic
 {
-    private readonly BillingSummaryRepository _repository;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _config;
-
-    public BillingSummaryService(BillingSummaryRepository repository, IHttpClientFactory httpClientFactory, IConfiguration config)
+    public class BillingSummaryService
     {
-        _repository = repository;
-        _httpClientFactory = httpClientFactory;
-        _config = config;
-    }
+        private readonly BillingSummaryRepository _repository;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _config;
 
-    public async Task<BillingSummary> CreateAsync(int bookingId, int showId, string paymentMethod)
-    {
-        var client = _httpClientFactory.CreateClient("ShowService");
-        var res = await client.GetAsync($"/api/Shows/{showId}");
-        res.EnsureSuccessStatusCode();
-
-        var show = JsonConvert.DeserializeObject<ShowDto>(await res.Content.ReadAsStringAsync());
-
-        decimal basePrice = show.TicketPrice;
-        decimal discount = GetDiscountByPaymentMethod(paymentMethod);
-        decimal gst = _config.GetValue<decimal>("Billing:GstPercent");
-        decimal serviceFee = _config.GetValue<decimal>("Billing:ServiceFee");
-
-        decimal discounted = basePrice - discount;
-        decimal gstAmount = (discounted * gst) / 100;
-        decimal finalAmount = discounted + gstAmount + serviceFee;
-
-        var summary = new BillingSummary
+        public BillingSummaryService(
+            BillingSummaryRepository repository,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration config)
         {
-            BookingId = bookingId,
-            BasePrice = basePrice,
-            Discount = discount,
-            GST = gstAmount,
-            ServiceFee = serviceFee,
-            FinalAmount = finalAmount
-        };
+            _repository = repository;
+            _httpClientFactory = httpClientFactory;
+            _config = config;
+        }
 
-        return await _repository.AddAsync(summary);
-    }
-
-    public async Task<BillingSummaryDto> GetByBookingIdAsync(int bookingId)
-    {
-        var billing = await _repository.GetByBookingIdAsync(bookingId);
-        if (billing == null) return null;
-
-        return new BillingSummaryDto
+        public async Task<BillingSummary> CreateAsync(int bookingId, int showId, string paymentMethod)
         {
-            BookingId = billing.BookingId,
-            BasePrice = billing.BasePrice,
-            Discount = billing.Discount,
-            GST = billing.GST,
-            ServiceFee = billing.ServiceFee,
-            FinalAmount = billing.FinalAmount
-        };
-    }
+            var client = _httpClientFactory.CreateClient("ShowService");
 
-    private decimal GetDiscountByPaymentMethod(string method)
-    {
-        return method.ToLower() switch
+            var response = await client.GetAsync($"/api/Shows/{showId}");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var show = JsonConvert.DeserializeObject<ShowInstanceDto>(content);
+
+            decimal basePrice = show.TicketPrice;
+            decimal discount = GetDiscountByPaymentMethod(paymentMethod);
+            decimal gstPercent = _config.GetValue<decimal>("Billing:GstPercent");
+            decimal serviceFee = _config.GetValue<decimal>("Billing:ServiceFee");
+
+            decimal discounted = basePrice - discount;
+            decimal gstAmount = (discounted * gstPercent) / 100;
+            decimal finalAmount = discounted + gstAmount + serviceFee;
+
+            var summary = new BillingSummary
+            {
+                BookingId = bookingId,
+                BasePrice = basePrice,
+                Discount = discount,
+                GST = gstAmount,
+                ServiceFee = serviceFee,
+                FinalAmount = finalAmount
+            };
+
+            return await _repository.AddAsync(summary);
+        }
+
+        public async Task<BillingSummaryDto?> GetByBookingIdAsync(int bookingId)
         {
-            "creditcard" => 30,
-            "wallet" => 20,
-            _ => 0
-        };
+            var billing = await _repository.GetByBookingIdAsync(bookingId);
+            if (billing == null) return null;
+
+            return new BillingSummaryDto
+            {
+                BookingId = billing.BookingId,
+                BasePrice = billing.BasePrice,
+                Discount = billing.Discount,
+                GST = billing.GST,
+                ServiceFee = billing.ServiceFee,
+                FinalAmount = billing.FinalAmount
+            };
+        }
+
+        private decimal GetDiscountByPaymentMethod(string method)
+        {
+            return method.ToLower() switch
+            {
+                "creditcard" => 30,
+                "wallet" => 20,
+                _ => 0
+            };
+        }
     }
 }

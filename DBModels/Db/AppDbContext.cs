@@ -16,7 +16,8 @@ namespace DBModels.Db
         public virtual DbSet<Theater> Theaters { get; set; } = null!;
         public virtual DbSet<MovieTheater> MovieTheaters { get; set; } = null!;
         public DbSet<BillingSummary> BillingSummaries { get; set; }
-        public DbSet<Show> Shows { get; set; }
+        public DbSet<ShowTemplate> ShowTemplates { get; set; }
+        public DbSet<ShowInstance> ShowInstances { get; set; }
 
 
 
@@ -30,7 +31,7 @@ namespace DBModels.Db
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ✅ Booking
+            //  Booking
             modelBuilder.Entity<Booking>(entity =>
             {
                 entity.HasKey(e => e.BookingId);
@@ -61,7 +62,7 @@ namespace DBModels.Db
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ✅ Movie
+            //  Movie
             modelBuilder.Entity<Movie>(entity =>
             {
                 entity.HasKey(e => e.MovieId);
@@ -70,7 +71,7 @@ namespace DBModels.Db
                 entity.Property(e => e.Duration).HasMaxLength(50);
             });
 
-            // ✅ Theater
+            //  Theater
             modelBuilder.Entity<Theater>(entity =>
             {
                 entity.HasKey(e => e.TheaterId);
@@ -79,7 +80,7 @@ namespace DBModels.Db
             });
 
 
-            // ✅ MovieTheater (many-to-many)
+            //  MovieTheater (many-to-many)
             modelBuilder.Entity<MovieTheater>(entity =>
             {
                 entity.HasKey(e => new { e.MovieId, e.TheaterId });
@@ -128,6 +129,11 @@ namespace DBModels.Db
                       .HasForeignKey<Payment>(p => p.BookingId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<ShowTemplate>()
+            .HasMany(t => t.ShowInstances)
+            .WithOne(i => i.ShowTemplate)
+            .HasForeignKey(i => i.ShowTemplateId);
 
         }
     }

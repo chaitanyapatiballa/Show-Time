@@ -35,6 +35,7 @@ namespace BookingService.Services
             var movieClient = _httpClientFactory.CreateClient("MovieService");
             var theaterClient = _httpClientFactory.CreateClient("TheaterService");
             var paymentClient = _httpClientFactory.CreateClient("PaymentService");
+            var showClient = _httpClientFactory.CreateClient("ShowService");
 
             var movie = await GetFromService<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
             var theater = await GetFromService<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
@@ -133,6 +134,7 @@ namespace BookingService.Services
                 var movieClient = _httpClientFactory.CreateClient("MovieService");
                 var theaterClient = _httpClientFactory.CreateClient("TheaterService");
                 var paymentClient = _httpClientFactory.CreateClient("PaymentService");
+                var showClient = _httpClientFactory.CreateClient("ShowService");
 
                 var movie = await GetFromService<MovieDto>(movieClient, $"/api/Movies/GetMovie/{booking.MovieId}");
                 var theater = await GetFromService<TheaterDto>(theaterClient, $"/api/Theaters/GetTheater/{booking.TheaterId}");
@@ -176,37 +178,62 @@ namespace BookingService.Services
 
             var savedBooking = await _repository.AddBooking(booking);
 
-            // 🔹 Call ShowService to get ShowId (based on Movie + Theater + Time)
-            var showClient = _httpClientFactory.CreateClient("ShowService");
-            var show = await GetFromService<ShowDto>(showClient, $"/api/Shows/GetShow?movieId={dto.MovieId}&theaterId={dto.TheaterId}&showTime={dto.ShowTime:O}");
-            if (show == null)
-                throw new Exception("Show not found.");
+            //  Get ShowInstanceId dynamically
+            var showId = await GetShowInstanceId(dto.MovieId, dto.TheaterId, dto.ShowTime);
+            if (showId == null) throw new Exception("Unable to fetch show instance.");
 
-            int showId = show.ShowId;
-
-            // 🔹 Call BillingSummaryController to generate billing (delegated to PaymentService)
             var paymentClient = _httpClientFactory.CreateClient("PaymentService");
-            var billingResponse = await paymentClient.PostAsync($"/api/BillingSummary/generate?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={dto.PaymentMethod ?? "cash"}", null);
+
+            //  Generate Billing
+            var billingResponse = await paymentClient.PostAsync(
+                $"/api/BillingSummary/generate?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={dto.PaymentMethod ?? "cash"}",
+                null);
+
             if (!billingResponse.IsSuccessStatusCode)
                 throw new Exception("Billing generation failed.");
 
-            // 🔹 Save billing summary into local DB for unified view 
             var billingData = await billingResponse.Content.ReadFromJsonAsync<BillingSummary>();
             if (billingData != null)
             {
                 await _repository.SaveBillingSummary(billingData);
             }
 
-            // 🔹 Call Payment endpoint in PaymentService
-            var paymentResponse = await paymentClient.PostAsync($"/api/Payment/make-payment?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={dto.PaymentMethod ?? "cash"}", null);
+            //  Trigger Payment
+            var paymentMethod = dto.PaymentMethod ?? "cash";
+            var paymentUrl = $"/api/Payment/make-payment?bookingId={savedBooking.BookingId}&showId={showId}&paymentMethod={paymentMethod}";
+
+            var paymentResponse = await paymentClient.PostAsync(paymentUrl, null);
+
             if (!paymentResponse.IsSuccessStatusCode)
-                throw new Exception("Payment failed.");
+            {
+                var errorContent = await paymentResponse.Content.ReadAsStringAsync();
+                throw new Exception($"Payment failed. StatusCode: {paymentResponse.StatusCode}, Response: {errorContent}");
+            }
 
             var payment = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
-            savedBooking.PaymentId = payment.PaymentId;
+            if (payment == null || payment.PaymentId <= 0)
+                throw new Exception("Invalid payment response received.");
 
+            savedBooking.PaymentId = payment.PaymentId;
             await _repository.UpdateBooking(savedBooking);
+
             return savedBooking;
+        }
+        private async Task<int?> GetShowInstanceId(int movieId, int theaterId, DateTime showTime)
+        {
+            var showClient = _httpClientFactory.CreateClient("ShowService");
+            var url = $"/api/Shows/instance?movieId={movieId}&theaterId={theaterId}&showTime={showTime.ToUniversalTime():O}";
+
+            var response = await showClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var content = await response.Content.ReadAsStringAsync();
+            var showInstance = System.Text.Json.JsonSerializer.Deserialize<ShowInstanceDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return showInstance?.ShowInstanceId;
         }
     }
 }
+
+
+

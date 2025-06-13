@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using BusinessLogic;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PaymentService.Controllers
 {
