@@ -1,12 +1,11 @@
-﻿namespace DBModels.Dto
+﻿namespace BookingService.DTOs;
+
+public class BillingsummaryDto
 {
-    public class BillingSummaryDto
-    {
-        public int BookingId { get; set; }
-        public decimal BasePrice { get; set; }
-        public decimal Discount { get; set; }
-        public decimal GST { get; set; }
-        public decimal ServiceFee { get; set; }
-        public decimal FinalAmount { get; set; }
-    }
+    public int Bookingid { get; set; }
+    public decimal Baseamount { get; set; }
+    public decimal Discount { get; set; }
+    public decimal Gst { get; set; }
+    public decimal Servicefee { get; set; }
+    public decimal Totalamount { get; set; }
 }

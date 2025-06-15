@@ -16,6 +16,4 @@ public partial class Movie
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
     public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
-    public virtual ICollection<MovieTheater> movietheaters { get; set; }
-    public string Genre { get; set; }
 }

@@ -28,7 +28,4 @@ public partial class Booking
     public virtual Payment? Payment { get; set; }
 
     public virtual Theater? Theater { get; set; }
-    public bool IsCancelled { get; set; }
-    public int Paymentid { get; set; }
-
 }

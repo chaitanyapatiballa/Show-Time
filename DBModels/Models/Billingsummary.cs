@@ -20,6 +20,4 @@ public partial class Billingsummary
     public decimal? Totalamount { get; set; }
 
     public virtual Booking? Booking { get; set; }
-    public decimal BasePrice { get; set; }
-    public decimal FinalAmount { get; set; }
 }

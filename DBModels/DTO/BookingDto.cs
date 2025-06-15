@@ -1,13 +1,11 @@
-﻿namespace BookingService.DTOs
+﻿namespace BookingService.DTOs;
+
+public class BookingDto
 {
-    public class BookingDto
-    {
-        public int UserId { get; set; }
-        public int MovieId { get; set; }
-        public int TheaterId { get; set; }
-        public string SeatNumber { get; set; }
-        public DateTime ShowTime { get; set; }
-        public string? CouponCode { get; set; }
-        public string? PaymentMethod { get; set; } 
-    }
+    public int Movieid { get; set; }
+    public int Theaterid { get; set; }
+    public int Userid { get; set; }
+    public string Seatnumber { get; set; } = string.Empty;
+    public DateTime Showtime { get; set; }
 }
+

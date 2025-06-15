@@ -1,55 +1,61 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TheaterService.Repositories
+namespace TheaterService.Repositories;
+
+public class TheaterRepository
 {
-    public class TheaterRepository
+    private readonly AppDbContext _context;
+
+    public TheaterRepository(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+    }
 
-        public TheaterRepository(AppDbContext context)
+    public async Task<List<Theater>> GetAllAsync()
+    {
+        return await _context.Theaters.Include(t => t.Movies).ToListAsync();
+    }
+
+    public async Task<Theater?> GetByIdAsync(int id)
+    {
+        return await _context.Theaters.Include(t => t.Movies)
+            .FirstOrDefaultAsync(t => t.Theaterid == id);
+    }
+
+    public async Task AddAsync(Theater theater, List<int>? movieIds)
+    {
+        if (movieIds != null && movieIds.Count > 0)
         {
-            _context = context;
+            var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
+            theater.Movies = movies;
+        }
+        _context.Theaters.Add(theater);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Theater theater, List<int>? movieIds)
+    {
+        var existing = await _context.Theaters.Include(t => t.Movies)
+            .FirstOrDefaultAsync(t => t.Theaterid == theater.Theaterid);
+
+        if (existing == null) return;
+
+        existing.Name = theater.Name;
+        existing.Location = theater.Location;
+
+        if (movieIds != null)
+        {
+            var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
+            existing.Movies = movies;
         }
 
-        public async Task<List<Theater>> GetTheaters()  
-        {
-            return await _context.Theaters.AsNoTracking().ToListAsync();
-        }
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task<Theater?> GetTheaterById(int id)  
-        {
-            return await _context.Theaters.FindAsync(id);
-        }
-
-        public async Task<Theater> AddTheater(Theater theater)  
-        {
-            _context.Theaters.Add(theater);
-            await _context.SaveChangesAsync();
-            return theater;
-        }
-
-        public async Task<Theater?> UpdateTheater(Theater updated)  
-        {
-            var existing = await _context.Theaters.FindAsync(updated.Theaterid);
-            if (existing == null) return null;
-
-            existing.Name = updated.Name;
-            existing.Location = updated.Location;
-            existing.Capacity = updated.Capacity;
-            await _context.SaveChangesAsync();
-
-            return existing;
-        }
-
-        public async Task<bool> DeleteTheater(int id)   
-        {
-            var theater = await _context.Theaters.FindAsync(id);
-            if (theater == null) return false;
-
-            _context.Theaters.Remove(theater);
-            await _context.SaveChangesAsync();
-            return true;
-        }
+    public async Task DeleteAsync(Theater theater)
+    {
+        _context.Theaters.Remove(theater);
+        await _context.SaveChangesAsync();
     }
 }

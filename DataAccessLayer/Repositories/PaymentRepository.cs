@@ -1,27 +1,27 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace PaymentService.Repositories
+namespace BookingService.Repositories;
+
+public class PaymentRepository
 {
-    public class PaymentRepository
+    private readonly AppDbContext _context;
+    public PaymentRepository(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-        public PaymentRepository(AppDbContext context)
-        {
-            _context = context;
-        }
-        public async Task<Payment> AddAsync(Payment payment)
-        {
-            _context.Payments.Add(payment);
-            await _context.SaveChangesAsync();
-            return payment;
-        }
+        _context = context;
+    }
 
-        public async Task<Payment> GetByBookingIdAsync(int bookingId)
-        {
-            return await _context.Payments.FirstOrDefaultAsync(p => p.Bookingid == bookingId);
-        }
+    public async Task<Payment> AddPaymentAsync(Payment payment)
+    {
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+        return payment;
+    }
 
+    public async Task<List<Payment>> GetPaymentsByUserAsync(int userId)
+    {
+        return await _context.Payments
+            .Where(p => p.Userid == userId)
+            .ToListAsync();
     }
 }
-

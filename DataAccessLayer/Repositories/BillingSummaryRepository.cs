@@ -1,27 +1,19 @@
 ﻿using DBModels.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories
+namespace BookingService.Repositories;
+
+public class BillingsummaryRepository
 {
-    public class BillingSummaryRepository
+    private readonly AppDbContext _context;
+    public BillingsummaryRepository(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+    }
 
-        public BillingSummaryRepository(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<Billingsummary> AddAsync(Billingsummary summary)
-        {
-            _context.BillingSummaries.Add(summary);
-            await _context.SaveChangesAsync();
-            return summary;
-        }
-
-        public async Task<Billingsummary> GetByBookingIdAsync(int bookingId)
-        {
-            return await _context.BillingSummaries.FirstOrDefaultAsync(pb => pb.Bookingid == bookingId);
-        }
+    public async Task<Billingsummary> AddSummaryAsync(Billingsummary summary)
+    {
+        _context.Billingsummaries.Add(summary);
+        await _context.SaveChangesAsync();
+        return summary;
     }
 }

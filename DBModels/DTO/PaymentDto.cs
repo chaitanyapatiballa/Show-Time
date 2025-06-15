@@ -1,12 +1,10 @@
-﻿namespace PaymentService.DTOs
+﻿namespace BookingService.DTOs;
+
+public class PaymentDto
 {
-    public class PaymentDto
-    {
-        public int UserId;
-        public int PaymentId { get; set; }
-        public int BookingId { get; set; }
-        public decimal AmountPaid { get; set; }
-        public string PaymentMethod { get; set; }
-        public DateTime PaymentDate { get; set; }
-    }
+    public int Bookingid { get; set; }
+    public decimal Amountpaid { get; set; }
+    public string Paymentmethod { get; set; } = string.Empty;
+    public int Userid { get; set; }
+    public DateTime Paymentdate { get; set; }
 }

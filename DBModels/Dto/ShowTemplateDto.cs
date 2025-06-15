@@ -1,10 +1,18 @@
-﻿using DBModels.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace DBModels.Dto
 {
-    public class ShowTemplateDto
+    public class ShowtemplateDto
     {
-        public int ShowTemplateid { get; set; }
-        public int MovieId { get; set; }
-        public int TheaterId { get; set; }
+        public int Showtemplateid { get; set; }
+        public decimal Baseprice { get; set; }
+        public string Format { get; set; } = string.Empty;
+        public string Language { get; set; } = string.Empty;
+        public int Movieid { get; set; }
+        public int Theaterid { get; set; }
     }
 }

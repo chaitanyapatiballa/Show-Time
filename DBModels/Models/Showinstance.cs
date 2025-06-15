@@ -12,9 +12,8 @@ public partial class Showinstance
     public DateOnly? Showdate { get; set; }
 
     public TimeOnly? Showtime { get; set; }
-    public DateTime ShowTime { get; set; }
+
     public int? Availableseats { get; set; }
 
     public virtual Showtemplate? Showtemplate { get; set; }
-    public decimal TicketPrice { get; set; }
 }
