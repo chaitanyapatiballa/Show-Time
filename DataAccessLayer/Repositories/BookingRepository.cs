@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingService.Repositories
@@ -26,15 +26,14 @@ namespace BookingService.Repositories
 
         public async Task<IEnumerable<string>> GetBookedSeats(int movieId, int theaterId, DateTime showTime)
         {
-            // Ensure showTime is UTC to match PostgreSQL expectation
             var showTimeUtc = DateTime.SpecifyKind(showTime, DateTimeKind.Utc);
 
             return await _context.Bookings
-                .Where(b => b.MovieId == movieId
-                         && b.TheaterId == theaterId
-                         && b.ShowTime == showTimeUtc
+                .Where(b => b.Movieid == movieId
+                         && b.Theaterid == theaterId
+                         && b.Showtime == showTimeUtc
                          && !b.IsCancelled)
-                .Select(b => b.SeatNumber)
+                .Select(b => b.Seatnumber!)
                 .ToListAsync();
         }
 
@@ -42,16 +41,16 @@ namespace BookingService.Repositories
         {
             var query = _context.Bookings.AsQueryable();
 
-            query = query.Where(b => b.UserId == userId);
+            query = query.Where(b => b.Userid == userId);
 
             if (fromDate.HasValue)
-                query = query.Where(b => b.BookingTime >= fromDate.Value);
+                query = query.Where(b => b.Bookingtime >= fromDate.Value);
 
             if (toDate.HasValue)
-                query = query.Where(b => b.BookingTime <= toDate.Value);
+                query = query.Where(b => b.Bookingtime <= toDate.Value);
 
             if (!string.IsNullOrEmpty(status))
-                query = query.Where(b => b.Status.ToLower() == status.ToLower());
+                query = query.Where(b => b.Status!.ToLower() == status.ToLower());
 
             return await query.ToListAsync();
         }
@@ -61,10 +60,10 @@ namespace BookingService.Repositories
             var query = _context.Bookings.AsQueryable();
 
             if (movieId.HasValue)
-                query = query.Where(b => b.MovieId == movieId.Value);
+                query = query.Where(b => b.Movieid == movieId.Value);
 
             if (theaterId.HasValue)
-                query = query.Where(b => b.TheaterId == theaterId.Value);
+                query = query.Where(b => b.Theaterid == theaterId.Value);
 
             return await query.ToListAsync();
         }
@@ -72,8 +71,14 @@ namespace BookingService.Repositories
         public async Task<List<Booking>> GetBookingsByUserId(int userId)
         {
             return await _context.Bookings
-                .Where(b => b.UserId == userId)
+                .Where(b => b.Userid == userId)
                 .ToListAsync();
+        }
+
+        public async Task SaveBillingSummary(Billingsummary summary)
+        {
+            _context.BillingSummaries.Add(summary);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateBooking(Booking booking)
@@ -81,12 +86,5 @@ namespace BookingService.Repositories
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
         }
-        public async Task SaveBillingSummary(BillingSummary summary)
-        {
-            _context.BillingSummaries.Add(summary);
-            await _context.SaveChangesAsync();
-        }
-
-
     }
 }

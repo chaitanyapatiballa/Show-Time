@@ -1,10 +1,9 @@
 ﻿using DataAccessLayer.Repositories;
-using DBModels.Db;
 using DBModels.Dto;
+using DBModels.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using System.Net.Http;
-using System.Threading.Tasks;
+
 
 namespace BusinessLogic
 {
@@ -24,7 +23,7 @@ namespace BusinessLogic
             _config = config;
         }
 
-        public async Task<BillingSummary> CreateAsync(int bookingId, int showId, string paymentMethod)
+        public async Task<Billingsummary> CreateAsync(int bookingId, int showId, string paymentMethod)
         {
             var client = _httpClientFactory.CreateClient("ShowService");
 
@@ -43,13 +42,13 @@ namespace BusinessLogic
             decimal gstAmount = (discounted * gstPercent) / 100;
             decimal finalAmount = discounted + gstAmount + serviceFee;
 
-            var summary = new BillingSummary
+            var summary = new Billingsummary
             {
-                BookingId = bookingId,
+                Bookingid = bookingId,
                 BasePrice = basePrice,
                 Discount = discount,
-                GST = gstAmount,
-                ServiceFee = serviceFee,
+                Gst = gstAmount,
+                Servicefee = serviceFee,
                 FinalAmount = finalAmount
             };
 
@@ -63,14 +62,15 @@ namespace BusinessLogic
 
             return new BillingSummaryDto
             {
-                BookingId = billing.BookingId,
+                BookingId = billing.Bookingid ?? 0,
                 BasePrice = billing.BasePrice,
-                Discount = billing.Discount,
-                GST = billing.GST,
-                ServiceFee = billing.ServiceFee,
+                Discount = billing.Discount ?? 0,
+                GST = billing.Gst ?? 0,
+                ServiceFee = billing.Servicefee ?? 0,
                 FinalAmount = billing.FinalAmount
             };
         }
+
 
         private decimal GetDiscountByPaymentMethod(string method)
         {

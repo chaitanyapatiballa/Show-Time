@@ -1,5 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
-using DBModels.Db;
+using DBModels.Models;
 
 namespace BusinessLogic
 {
@@ -12,27 +12,32 @@ namespace BusinessLogic
             _repository = repository;
         }
 
-        public async Task<ShowInstance?> GetShowInstance(int movieId, int theaterId, DateTime showTime)
+        public async Task<Showinstance?> GetShowInstance(int movieId, int theaterId, DateTime showTime)
         {
             return await _repository.GetShowInstance(movieId, theaterId, showTime);
         }
 
-        public async Task<ShowTemplate> CreateTemplate(int movieId, int theaterId)
+        public async Task<Showtemplate> CreateTemplate(int movieId, int theaterId)
         {
-            var template = new ShowTemplate { MovieId = movieId, TheaterId = theaterId };
+            var template = new Showtemplate
+            {
+                Movieid = movieId,
+                Theaterid = theaterId
+            };
             return await _repository.AddTemplateAsync(template);
         }
 
-        public async Task<ShowInstance> CreateInstance(int templateId, DateTime showTime, decimal ticketPrice)
+        public async Task<Showinstance> CreateInstance(int templateId, DateTime showTime, decimal ticketPrice)
         {
-            var instance = new ShowInstance
+            var instance = new Showinstance
             {
-                ShowTemplateId = templateId,
-                ShowTime = showTime,
+                Showtemplateid = templateId,
+                Showdate = DateOnly.FromDateTime(showTime), 
+                Showtime = TimeOnly.FromDateTime(showTime), 
+                ShowTime = showTime, 
                 TicketPrice = ticketPrice
             };
             return await _repository.AddInstanceAsync(instance);
         }
     }
 }
-

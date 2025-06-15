@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieService.Models;
@@ -67,7 +67,7 @@ namespace MovieService.Controllers
                 };
 
                 var created = await _movieService.AddMovie(movie);
-                return CreatedAtAction(nameof(GetMovie), new { id = created.MovieId }, created);
+                return CreatedAtAction(nameof(GetMovie), new { id = created.Movieid }, created);
             }
             catch (DbUpdateException ex)
             {
@@ -92,7 +92,7 @@ namespace MovieService.Controllers
 
                 var movie = new Movie
                 {
-                    MovieId = id,
+                    Movieid = id,
                     Title = movieDto.Title,
                     Genre = movieDto.Genre,
                     Duration = movieDto.Duration

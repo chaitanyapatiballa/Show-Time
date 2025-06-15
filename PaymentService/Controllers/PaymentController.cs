@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
-using PaymentService.Services;
+
 
 namespace PaymentService.Controllers
 {
@@ -23,12 +23,12 @@ namespace PaymentService.Controllers
                 var payment = await _paymentService.MakePaymentAsync(bookingId, showId, paymentMethod);
                 return Ok(new PaymentDto
                 {
-                    PaymentId = payment.PaymentId,
-                    BookingId = payment.BookingId,
+                    PaymentId = payment.Paymentid,
+                    BookingId = payment.Bookingid,
                     AmountPaid = payment.AmountPaid,
-                    PaymentMethod = payment.PaymentMethod,
-                    PaymentDate = payment.PaymentDate,
-                    UserId = payment.UserId
+                    PaymentMethod = payment.Paymentmethod,
+                    PaymentDate = payment.Paymentdate,
+                    UserId = payment.Userid
                 });
             }
             catch (Exception ex)
@@ -46,12 +46,12 @@ namespace PaymentService.Controllers
 
             return Ok(new PaymentDto
             {
-                PaymentId = payment.PaymentId,
-                BookingId = payment.BookingId,
+                PaymentId = payment.Paymentid,
+                BookingId = payment.Bookingid,
                 AmountPaid = payment.AmountPaid,
-                PaymentMethod = payment.PaymentMethod,
-                PaymentDate = payment.PaymentDate,
-                UserId = payment.UserId
+                PaymentMethod = payment.Paymentmethod,
+                PaymentDate = payment.Paymentdate,
+                UserId = payment.Userid
             });
         }
     }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace DBModels.Db
+namespace DBModels.Models
 {
     public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {

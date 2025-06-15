@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace PaymentService.Repositories
@@ -19,7 +19,7 @@ namespace PaymentService.Repositories
 
         public async Task<Payment> GetByBookingIdAsync(int bookingId)
         {
-            return await _context.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId);
+            return await _context.Payments.FirstOrDefaultAsync(p => p.Bookingid == bookingId);
         }
 
     }

@@ -1,6 +1,6 @@
 using BusinessLogic;
 using DataAccessLayer.Repositories;
-using DBModels.Db;
+using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +13,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ShowRepository>();
 builder.Services.AddScoped<ShowManager>();
 
+builder.Services.AddHttpClient();
+
 // API
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -22,6 +24,12 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Use HTTPS redirection if needed
+app.UseHttpsRedirection();
+
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();

@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 using TheaterService.DTOs;
 using TheaterService.Services;
@@ -69,7 +69,7 @@ namespace TheaterService.Controllers
 
                 var resultDto = new TheaterDto
                 {
-                    TheaterId = addedTheater.TheaterId,
+                    TheaterId = addedTheater.Theaterid,
                     Name = addedTheater.Name,
                     Location = addedTheater.Location,
                     Capacity = addedTheater.Capacity

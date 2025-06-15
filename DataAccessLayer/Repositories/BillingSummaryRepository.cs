@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Repositories
@@ -12,16 +12,16 @@ namespace DataAccessLayer.Repositories
             _context = context;
         }
 
-        public async Task<BillingSummary> AddAsync(BillingSummary summary)
+        public async Task<Billingsummary> AddAsync(Billingsummary summary)
         {
             _context.BillingSummaries.Add(summary);
             await _context.SaveChangesAsync();
             return summary;
         }
 
-        public async Task<BillingSummary> GetByBookingIdAsync(int bookingId)
+        public async Task<Billingsummary> GetByBookingIdAsync(int bookingId)
         {
-            return await _context.BillingSummaries.FirstOrDefaultAsync(pb => pb.BookingId == bookingId);
+            return await _context.BillingSummaries.FirstOrDefaultAsync(pb => pb.Bookingid == bookingId);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using BookingService.DTOs;
 using BookingService.Services;
-using DBModels.Db;
+using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
 
@@ -23,29 +23,26 @@ namespace BookingService.Controllers
             if (bookingDto == null)
                 return BadRequest("Booking data is required.");
 
-            //  Create Booking object (no PaymentId here)
             var booking = new Booking
             {
-                UserId = bookingDto.UserId,
-                MovieId = bookingDto.MovieId,
-                TheaterId = bookingDto.TheaterId,
-                SeatNumber = bookingDto.SeatNumber,
-                ShowTime = bookingDto.ShowTime,
-                BookingTime = DateTime.UtcNow,
+                Userid = bookingDto.UserId,
+                Movieid = bookingDto.MovieId,
+                Theaterid = bookingDto.TheaterId,
+                Seatnumber = bookingDto.SeatNumber,
+                Showtime = bookingDto.ShowTime,
+                Bookingtime = DateTime.UtcNow,
                 IsCancelled = false,
                 Status = "Confirmed"
             };
 
-            //  Save booking in DB
             var savedBooking = await _service.CreateBooking(booking);
 
-            //  Call PaymentService
             var paymentClient = _service.CreatePaymentServiceClient();
             var paymentRequest = new PaymentDto
             {
-                BookingId = savedBooking.BookingId,
-                UserId = savedBooking.UserId, 
-                AmountPaid = 300.0M  
+                BookingId = savedBooking.Bookingid,
+                UserId = savedBooking.Userid,
+                AmountPaid = 300.0M // default
             };
 
             var paymentResponse = await paymentClient.PostAsJsonAsync("/api/Payment", paymentRequest);
@@ -53,13 +50,11 @@ namespace BookingService.Controllers
                 return StatusCode(500, "Payment failed.");
 
             var payment = await paymentResponse.Content.ReadFromJsonAsync<PaymentDto>();
+            savedBooking.Paymentid = payment?.PaymentId ?? 0;
 
-            //  Update booking with payment id
-            savedBooking.PaymentId = payment.PaymentId;
             await _service.UpdateBooking(savedBooking);
 
-            //  Return final booking with payment info
-            var result = await _service.GetBookingDetails(savedBooking.BookingId);
+            var result = await _service.GetBookingDetails(savedBooking.Bookingid);
             return Ok(result);
         }
 
@@ -67,9 +62,7 @@ namespace BookingService.Controllers
         public async Task<IActionResult> GetBooking(int id)
         {
             var result = await _service.GetBookingDetails(id);
-            if (result == null)
-                return NotFound("Booking not found.");
-            return Ok(result);
+            return result == null ? NotFound("Booking not found.") : Ok(result);
         }
 
         [HttpGet("available-seats")]
@@ -87,10 +80,7 @@ namespace BookingService.Controllers
         }
 
         [HttpGet("GetBookingHistoryByUserId")]
-        public async Task<IActionResult> GetBookingHistoryByUserId( int userId, [FromQuery] string? status)
-            //[FromQuery] DateTime? startDate,
-            //[FromQuery] DateTime? endDate,
-            
+        public async Task<IActionResult> GetBookingHistoryByUserId(int userId, [FromQuery] string? status)
         {
             try
             {

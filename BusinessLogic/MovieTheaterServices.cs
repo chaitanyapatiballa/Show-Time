@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using TheaterService.DTOs;
 using TheaterService.Repositories;
 
@@ -18,9 +18,9 @@ namespace TheaterService.Services
             var assignments = await _repository.GetAllAssignmentsAsync();
             var result = assignments.Select(mt => new
             {
-                MovieId = mt.MovieId,
+                MovieId = mt.Movieid,
                 MovieTitle = mt.Movie?.Title,
-                TheaterId = mt.TheaterId,
+                TheaterId = mt.Theaterid,
                 TheaterName = mt.Theater?.Name,
                 TheaterLocation = mt.Theater?.Location
             }).ToList<object>();
@@ -32,8 +32,8 @@ namespace TheaterService.Services
         {
             var assignment = new MovieTheater
             {
-                MovieId = dto.MovieId,
-                TheaterId = dto.TheaterId
+                Movieid = dto.MovieId,
+                Theaterid = dto.TheaterId
             };
 
             await _repository.AddAssignmentAsync(assignment);

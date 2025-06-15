@@ -1,6 +1,6 @@
 ﻿using BusinessLogic;
 using DataAccessLayer.Repositories;
-using DBModels.Db;
+using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 using PaymentService.Repositories;
 using PaymentService.Services;

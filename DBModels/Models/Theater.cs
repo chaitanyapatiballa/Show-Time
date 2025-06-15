@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DBModels.Models;
 
 namespace DBModels.Models;
 
@@ -16,4 +15,6 @@ public partial class Theater
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
     public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
+    public virtual ICollection<MovieTheater> movietheaters { get; set; }
+    public int Capacity { get; set; }
 }

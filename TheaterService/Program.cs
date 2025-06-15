@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 using TheaterService.Repositories;
 using TheaterService.Services;

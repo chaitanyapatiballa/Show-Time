@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using TheaterService.DTOs;
 using TheaterService.Repositories;
 

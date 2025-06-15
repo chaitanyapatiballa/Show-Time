@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using MovieService.Repositories;
 
 namespace MovieService.Services
@@ -24,11 +24,13 @@ namespace MovieService.Services
 
         public async Task<Movie> AddMovie(Movie movie)
         {
+            
             return await _movieRepository.AddMovieAsync(movie);
         }
 
         public async Task<Movie?> UpdateMovie(Movie movie)
         {
+            
             return await _movieRepository.UpdateMovieAsync(movie);
         }
 

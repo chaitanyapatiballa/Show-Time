@@ -1,7 +1,7 @@
 ﻿using BookingService.Repositories;
 using BookingService.Services;
 using DataAccessLayer.Repositories;
-using DBModels.Db;
+using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DBModels.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace TheaterService.DTOs
 {

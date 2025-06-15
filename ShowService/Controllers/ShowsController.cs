@@ -23,36 +23,29 @@ namespace ShowService.Controllers
 
             return new ShowInstanceDto
             {
-                ShowInstanceId = show.ShowInstanceId,
-                ShowTemplateId = show.ShowTemplateId,
+                ShowInstanceid = show.Showinstanceid,
+                ShowTemplateid = show.Showtemplateid,
                 ShowTime = show.ShowTime,
                 TicketPrice = show.TicketPrice
-            };
-        }
-
-        [HttpPost("CreateTemplate")]
-        public async Task<ActionResult<ShowTemplateDto>> CreateTemplate([FromBody] ShowTemplateDto dto)
-        {
-            var template = await _manager.CreateTemplate(dto.MovieId, dto.TheaterId);
-            return new ShowTemplateDto
-            {
-                ShowTemplateId = template.ShowTemplateId,
-                MovieId = template.MovieId,
-                TheaterId = template.TheaterId
             };
         }
 
         [HttpPost("CreateInstance")]
         public async Task<ActionResult<ShowInstanceDto>> CreateInstance([FromBody] ShowInstanceDto dto)
         {
-            var instance = await _manager.CreateInstance(dto.ShowTemplateId, dto.ShowTime, dto.TicketPrice);
+            if (dto.ShowTemplateid == null)
+                return BadRequest("ShowTemplateid is required.");
+
+            var instance = await _manager.CreateInstance(dto.ShowTemplateid.Value, dto.ShowTime, dto.TicketPrice);
             return new ShowInstanceDto
             {
-                ShowInstanceId = instance.ShowInstanceId,
-                ShowTemplateId = instance.ShowTemplateId,
+                ShowInstanceid = instance.Showinstanceid,
+                ShowTemplateid = instance.Showtemplateid,
                 ShowTime = instance.ShowTime,
                 TicketPrice = instance.TicketPrice
             };
         }
     }
 }
+
+        

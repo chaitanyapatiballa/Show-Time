@@ -1,5 +1,5 @@
 ﻿using BusinessLogic;
-using DBModels.Db;
+using DBModels.Models;
 using PaymentService.Repositories;
 
 namespace PaymentService.Services  
@@ -21,10 +21,10 @@ namespace PaymentService.Services
 
             var payment = new Payment
             {
-                BookingId = bookingId,
+                Bookingid = bookingId,
                 AmountPaid = billing.FinalAmount,
-                PaymentMethod = paymentMethod,
-                PaymentDate = DateTime.UtcNow
+                Paymentmethod = paymentMethod,
+                Paymentdate = DateTime.UtcNow
             };
 
             return await _repo.AddAsync(payment);

@@ -1,4 +1,4 @@
-﻿using DBModels.Db;
+﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace TheaterService.Repositories
@@ -31,7 +31,7 @@ namespace TheaterService.Repositories
 
         public async Task<Theater?> UpdateTheater(Theater updated)  
         {
-            var existing = await _context.Theaters.FindAsync(updated.TheaterId);
+            var existing = await _context.Theaters.FindAsync(updated.Theaterid);
             if (existing == null) return null;
 
             existing.Name = updated.Name;
