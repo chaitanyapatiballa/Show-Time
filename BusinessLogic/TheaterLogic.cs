@@ -4,22 +4,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic;
 
-public class TheaterLogic   
+public class TheaterLogic
 {
-    private readonly TheaterRepository _repository;
     private readonly AppDbContext _context;
+    private readonly TheaterRepository _repository;
 
-    public TheaterLogic(AppDbContext context, TheaterRepository repository)
+    public TheaterLogic(AppDbContext context)
     {
         _context = context;
-        _repository = repository;
+        _repository = new TheaterRepository(context);
     }
 
-    public async Task<List<Theater>> GetAllAsync() =>
-        await _repository.GetAllAsync();
+    public async Task<List<Theater>> GetAllAsync()
+    {
+        return await _context.Theaters
+            .Include(t => t.MovieTheaters)
+            .ThenInclude(mt => mt.Movie)
+            .ToListAsync();
+    }
 
-    public async Task<Theater?> GetByIdAsync(int id) =>
-        await _repository.GetByIdAsync(id);
+    public async Task<Theater?> GetByIdAsync(int id)
+    {
+        return await _context.Theaters
+            .Include(t => t.MovieTheaters)
+            .ThenInclude(mt => mt.Movie)
+            .FirstOrDefaultAsync(t => t.Theaterid == id);
+    }
+
     public async Task AddAsync(Theater theater, List<int>? movieIds)
     {
         if (movieIds != null && movieIds.Any())
@@ -35,25 +46,33 @@ public class TheaterLogic
             }).ToList();
         }
 
-        _context.Theaters.Add(theater);
-        await _context.SaveChangesAsync();
+        await _repository.AddAsync(theater);
     }
 
-
-
-    public async Task UpdateAsync(Theater theater)
+    public async Task UpdateAsync(Theater theater, List<int>? movieIds)
     {
-        var existing = await _context.Theaters.FindAsync(theater.Theaterid);
-        if (existing == null) return;
+        // Remove existing MovieTheater links
+        var existingLinks = _context.MovieTheaters.Where(mt => mt.Theaterid == theater.Theaterid);
+        _context.MovieTheaters.RemoveRange(existingLinks);
 
-        existing.Name = theater.Name;
-        existing.Location = theater.Location;
+        if (movieIds != null && movieIds.Any())
+        {
+            var movies = await _context.Movies
+                .Where(m => movieIds.Contains(m.Movieid))
+                .ToListAsync();
 
-        _context.Theaters.Update(existing);
-        await _context.SaveChangesAsync();
+            theater.MovieTheaters = movies.Select(m => new MovieTheater
+            {
+                Movieid = m.Movieid,
+                Theaterid = theater.Theaterid
+            }).ToList();
+        }
+
+        await _repository.UpdateAsync(theater);
     }
 
-
-    public async Task DeleteAsync(Theater theater) =>
+    public async Task DeleteAsync(Theater theater)
+    {
         await _repository.DeleteAsync(theater);
+    }
 }

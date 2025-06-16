@@ -1,92 +1,82 @@
 ﻿using BusinessLogic;
+using DBModels.Dto;
 using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 using TheaterService.DTOs;
 
-namespace TheaterService.Controllers;
+namespace MovieBookingAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TheaterController(TheaterLogic service) : ControllerBase
+public class TheaterController : ControllerBase
 {
-    private readonly TheaterLogic _service = service;
+    private readonly TheaterLogic _logic;
 
+    public TheaterController(TheaterLogic logic)
+    {
+        _logic = logic;
+    }
+
+   
     [HttpGet]
-    public async Task<ActionResult<List<TheaterDto>>> GetAll()
+    public async Task<ActionResult<List<Theater>>> GetAllTheaters()
     {
-        var theaters = await _service.GetAllAsync();
-
-        var dtoList = theaters.Select(t => new TheaterDto
-        {
-            Theaterid = t.Theaterid,
-            Name = t.Name,
-            Location = t.Location,
-            MovieIds = t.MovieTheaters
-                        .Where(mt => mt.Movieid != null)
-                        .Select(mt => mt.Movieid!.Value)
-                        .ToList()
-        }).ToList();
-
-        return dtoList;
+        var theaters = await _logic.GetAllAsync();
+        return Ok(theaters);
     }
 
-
+   
     [HttpGet("{id}")]
-    public async Task<ActionResult<TheaterDto>> GetById(int id)
+    public async Task<ActionResult<Theater>> GetTheaterById(int id)
     {
-        var theater = await _service.GetByIdAsync(id);
-        if (theater == null) return NotFound();
+        var theater = await _logic.GetByIdAsync(id);
+        if (theater == null)
+            return NotFound();
 
-        var dto = new TheaterDto
-        {
-            Theaterid = theater.Theaterid,
-            Name = theater.Name,
-            Location = theater.Location,
-            MovieIds = theater.MovieTheaters
-                              .Where(mt => mt.Movieid != null)
-                              .Select(mt => mt.Movieid!.Value)
-                              .ToList()
-        };
-
-        return dto;
+        return Ok(theater);
     }
 
-
+    
     [HttpPost]
-    public async Task<ActionResult> Create(TheaterDto dto)
+    public async Task<ActionResult> CreateTheater([FromBody] TheaterDto dto)
     {
         var theater = new Theater
         {
             Name = dto.Name,
-            Location = dto.Location
+            Location = dto.Location,
+            Capacity = dto.Capacity
         };
 
-        await _service.AddAsync(theater, dto.MovieIds);
-        return CreatedAtAction(nameof(GetById), new { id = theater.Theaterid }, theater);
+        await _logic.AddAsync(theater, dto.MovieIds);
+
+        return CreatedAtAction(nameof(GetTheaterById), new { id = theater.Theaterid }, theater);
     }
 
+    
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, TheaterDto dto)
+    public async Task<ActionResult> UpdateTheater(int id, [FromBody] TheaterDto dto)
     {
-        var theater = new Theater
-        {
-            Theaterid = id,
-            Name = dto.Name,
-            Location = dto.Location
-        };
+        var existing = await _logic.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound();
 
-        await _service.UpdateAsync(theater); 
+        existing.Name = dto.Name;
+        existing.Location = dto.Location;
+        existing.Capacity = dto.Capacity;
+
+        await _logic.UpdateAsync(existing, dto.MovieIds);
         return NoContent();
     }
 
 
-
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
+    public async Task<ActionResult> DeleteTheater(int id)
     {
-        var theater = await _service.GetByIdAsync(id);
-        if (theater == null) return NotFound();
-        await _service.DeleteAsync(theater);
+        var existing = await _logic.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound();
+
+        await _logic.DeleteAsync(existing);
         return NoContent();
     }
 }

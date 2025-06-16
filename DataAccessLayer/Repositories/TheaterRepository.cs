@@ -14,20 +14,13 @@ public class TheaterRepository
 
     public async Task<List<Theater>> GetAllAsync()
     {
-        return await _context.Theaters
-            .Include(t => t.MovieTheaters)
-                .ThenInclude(mt => mt.Movie)
-            .ToListAsync();
+        return await _context.Theaters.ToListAsync();
     }
 
     public async Task<Theater?> GetByIdAsync(int id)
     {
-        return await _context.Theaters
-            .Include(t => t.MovieTheaters)
-                .ThenInclude(mt => mt.Movie)
-            .FirstOrDefaultAsync(t => t.Theaterid == id);
+        return await _context.Theaters.FindAsync(id);
     }
-
 
     public async Task AddAsync(Theater theater)
     {
