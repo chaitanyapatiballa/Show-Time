@@ -12,23 +12,49 @@ public class TheaterController(TheaterLogic service) : ControllerBase
     private readonly TheaterLogic _service = service;
 
     [HttpGet]
-    public async Task<ActionResult<List<Theater>>> GetAll()
+    public async Task<ActionResult<List<TheaterDto>>> GetAll()
     {
-        return await _service.GetAllAsync();
+        var theaters = await _service.GetAllAsync();
+
+        var dtoList = theaters.Select(t => new TheaterDto
+        {
+            Theaterid = t.Theaterid,
+            Name = t.Name,
+            Location = t.Location,
+            MovieIds = t.MovieTheaters.Select(mt => mt.Movieid).ToList()
+        }).ToList();
+
+        return dtoList;
     }
 
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<Theater>> GetById(int id)
+    public async Task<ActionResult<TheaterDto>> GetById(int id)
     {
         var theater = await _service.GetByIdAsync(id);
         if (theater == null) return NotFound();
-        return theater;
+
+        var dto = new TheaterDto
+        {
+            Theaterid = theater.Theaterid,
+            Name = theater.Name,
+            Location = theater.Location,
+            MovieIds = theater.MovieTheaters.Select(mt => mt.Movieid).ToList()
+        };
+
+        return dto;
     }
+
 
     [HttpPost]
     public async Task<ActionResult> Create(TheaterDto dto)
     {
-        var theater = new Theater { Name = dto.Name, Location = dto.Location };
+        var theater = new Theater
+        {
+            Name = dto.Name,
+            Location = dto.Location
+        };
+
         await _service.AddAsync(theater, dto.MovieIds);
         return CreatedAtAction(nameof(GetById), new { id = theater.Theaterid }, theater);
     }
@@ -36,18 +62,18 @@ public class TheaterController(TheaterLogic service) : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, TheaterDto dto)
     {
-        if (id != dto.Theaterid) return BadRequest();
-
         var theater = new Theater
         {
-            Theaterid = dto.Theaterid,
+            Theaterid = id,
             Name = dto.Name,
             Location = dto.Location
         };
 
-        await _service.UpdateAsync(theater, dto.MovieIds);
+        await _service.UpdateAsync(theater); 
         return NoContent();
     }
+
+
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)

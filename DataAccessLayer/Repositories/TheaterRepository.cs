@@ -1,50 +1,44 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories; 
+namespace DataAccessLayer.Repositories;
 
-public class TheaterRepository(AppDbContext context)
+public class TheaterRepository
 {
-    private readonly AppDbContext _context = context;
+    private readonly AppDbContext _context;
+
+    public TheaterRepository(AppDbContext context)
+    {
+        _context = context;
+    }
 
     public async Task<List<Theater>> GetAllAsync()
     {
-        return await _context.Theaters.Include(t => t.Movies).ToListAsync();
+        return await _context.Theaters
+            .Include(t => t.MovieTheaters)
+                .ThenInclude(mt => mt.Movie)
+            .ToListAsync();
     }
 
     public async Task<Theater?> GetByIdAsync(int id)
     {
-        return await _context.Theaters.Include(t => t.Movies)
+        return await _context.Theaters
+            .Include(t => t.MovieTheaters)
+                .ThenInclude(mt => mt.Movie)
             .FirstOrDefaultAsync(t => t.Theaterid == id);
     }
 
-    public async Task AddAsync(Theater theater, List<int>? movieIds)
+
+    public async Task AddAsync(Theater theater)
     {
-        if (movieIds != null && movieIds.Count > 0)
-        {
-            var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
-            theater.Movies = movies;
-        }
         _context.Theaters.Add(theater);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(); 
     }
 
-    public async Task UpdateAsync(Theater theater, List<int>? movieIds)
+
+    public async Task UpdateAsync(Theater theater)
     {
-        var existing = await _context.Theaters.Include(t => t.Movies)
-            .FirstOrDefaultAsync(t => t.Theaterid == theater.Theaterid);
-
-        if (existing == null) return;
-
-        existing.Name = theater.Name;
-        existing.Location = theater.Location;
-
-        if (movieIds != null)
-        {
-            var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
-            existing.Movies = movies;
-        }
-
+        _context.Theaters.Update(theater);
         await _context.SaveChangesAsync();
     }
 

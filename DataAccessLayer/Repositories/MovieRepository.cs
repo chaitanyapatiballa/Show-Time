@@ -30,23 +30,47 @@ public class MovieRepository(AppDbContext context)
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Showtemplate>> GetAllShowtemplatesAsync() => await _context.Showtemplates.ToListAsync();
-    public async Task<Showtemplate?> GetShowtemplateByIdAsync(int id) => await _context.Showtemplates.FindAsync(id);
+    public async Task<List<Showtemplate>> GetAllShowtemplatesAsync()
+    {
+        return await _context.Showtemplates.ToListAsync();
+    }
+
+    public async Task<Showtemplate?> GetShowtemplateByIdAsync(int id)
+    {
+        return await _context.Showtemplates.FindAsync(id);
+    }
+
     public async Task AddShowtemplateAsync(Showtemplate template)
     {
+        
+        bool exists = await _context.MovieTheaters.AnyAsync(mt =>
+            mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
+
+        if (!exists)
+        {
+            _context.MovieTheaters.Add(new MovieTheater
+            {
+                Movieid = template.Movieid,
+                Theaterid = template.Theaterid
+            });
+        }
+
         _context.Showtemplates.Add(template);
         await _context.SaveChangesAsync();
     }
+
     public async Task UpdateShowtemplateAsync(Showtemplate template)
     {
         _context.Showtemplates.Update(template);
         await _context.SaveChangesAsync();
     }
+
     public async Task DeleteShowtemplateAsync(Showtemplate template)
     {
         _context.Showtemplates.Remove(template);
         await _context.SaveChangesAsync();
     }
+
 
     public async Task<List<Showinstance>> GetAllShowinstancesAsync() => await _context.Showinstances.ToListAsync();
     public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) => await _context.Showinstances.FindAsync(id);

@@ -2,29 +2,36 @@
 using DataAccessLayer.Repositories;
 using DBModels.Models;
 
-
-namespace BusinessLogic;
-
-public class PaymentLogic(PaymentRepository repository)
+namespace BusinessLogic
 {
-    private readonly PaymentRepository _repository = repository;
-
-    public async Task<Payment> ProcessPaymentAsync(PaymentDto dto)   
+    public class PaymentLogic
     {
-        var payment = new Payment
+        private readonly PaymentRepository _repository;
+        private readonly AppDbContext _context;
+
+        public PaymentLogic(PaymentRepository repository, AppDbContext context)
         {
-            Bookingid = dto.Bookingid,
-            Amountpaid = dto.Amountpaid,
-            Paymentmethod = dto.Paymentmethod,
-            Userid = dto.Userid,
-            Paymentdate = DateTime.UtcNow
-        };
+            _repository = repository;
+            _context = context;
+        }
 
-        return await _repository.AddPaymentAsync(payment);
-    }
+        public async Task<Payment> ProcessPaymentAsync(PaymentDto dto)
+        {
+            var payment = new Payment
+            {
+                Bookingid = dto.Bookingid,
+                Amountpaid = dto.Amountpaid,
+                Paymentmethod = dto.Paymentmethod,
+                Userid = dto.Userid,
+                Paymentdate = DateTime.UtcNow
+            };
 
-    public async Task<List<Payment>> GetUserPaymentsAsync(int userId)
-    {
-        return await _repository.GetPaymentsByUserAsync(userId);
+            return await _repository.AddPaymentAsync(payment);
+        }
+
+        public async Task<List<Payment>> GetUserPaymentsAsync(int userId)
+        {
+            return await _repository.GetPaymentsByUserAsync(userId);
+        }
     }
 }

@@ -7,12 +7,18 @@ namespace MovieService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MovieController(MovieLogic service) : ControllerBase
+public class MovieController : ControllerBase
 {
-    private readonly MovieLogic _service = service;
+    private readonly MovieLogic _service;
+
+    public MovieController(MovieLogic service)
+    {
+        _service = service;
+    }
 
     [HttpGet("movies")]
-    public async Task<ActionResult<List<Movie>>> GetAllMovies() => await _service.GetAllAsync();
+    public async Task<ActionResult<List<Movie>>> GetAllMovies()
+        => await _service.GetAllAsync();
 
     [HttpGet("movies/{id}")]
     public async Task<ActionResult<Movie>> GetMovieById(int id)
@@ -30,24 +36,28 @@ public class MovieController(MovieLogic service) : ControllerBase
     }
 
     [HttpPut("movies/{id}")]
-    public async Task<ActionResult> UpdateMovie(int id, Movie updatedMovie)
+    public async Task<IActionResult> UpdateMovie(int id, MovieDto movieDto)
     {
-        if (id != updatedMovie.Movieid) return BadRequest();
-        await _service.UpdateAsync(updatedMovie);
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        await _service.UpdateAsync(id, movieDto);
         return NoContent();
     }
 
     [HttpDelete("movies/{id}")]
-    public async Task<ActionResult> DeleteMovie(int id)
+    public async Task<IActionResult> DeleteMovie(int id)
     {
-        var movie = await _service.GetByIdAsync(id);
-        if (movie == null) return NotFound();
-        await _service.DeleteAsync(movie);
+        var existing = await _service.GetByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        await _service.DeleteAsync(id);
         return NoContent();
     }
 
     [HttpGet("showtemplates")]
-    public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates() => await _service.GetAllShowtemplatesAsync();
+    public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates()
+        => await _service.GetAllShowtemplatesAsync();
 
     [HttpGet("showtemplates/{id}")]
     public async Task<ActionResult<Showtemplate>> GetShowtemplateById(int id)
@@ -58,26 +68,28 @@ public class MovieController(MovieLogic service) : ControllerBase
     }
 
     [HttpPost("showtemplates")]
-    public async Task<ActionResult> CreateShowtemplate(Showtemplate template)
+    public async Task<ActionResult> CreateShowtemplate(ShowtemplateDto dto)
     {
-        await _service.AddShowtemplateAsync(template);
+        var template = await _service.AddShowtemplateAsync(dto);
         return CreatedAtAction(nameof(GetShowtemplateById), new { id = template.Showtemplateid }, template);
     }
-
     [HttpPut("showtemplates/{id}")]
-    public async Task<ActionResult> UpdateShowtemplate(int id, Showtemplate template)
+    public async Task<ActionResult> UpdateShowtemplate(int id, ShowtemplateDto dto)
     {
-        if (id != template.Showtemplateid) return BadRequest();
-        await _service.UpdateShowtemplateAsync(template);
+        var existing = await _service.GetShowtemplateByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        await _service.UpdateShowtemplateAsync(id, dto);
         return NoContent();
     }
+
 
     [HttpDelete("showtemplates/{id}")]
     public async Task<ActionResult> DeleteShowtemplate(int id)
     {
         var template = await _service.GetShowtemplateByIdAsync(id);
         if (template == null) return NotFound();
-        await _service.DeleteShowtemplateAsync(template);
+        await _service.DeleteShowtemplateAsync(id);
         return NoContent();
     }
 

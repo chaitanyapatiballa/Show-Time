@@ -11,13 +11,14 @@ public partial class Movie
 
     public string? Duration { get; set; }
 
-  
-    public DateTime? releasedate { get; set; }          
+
+    public DateTime? releasedate { get; set; }
     public string? Genre { get; set; }
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
+    public virtual ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+
 }
