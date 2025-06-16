@@ -27,13 +27,22 @@ public class MovieController : ControllerBase
         if (movie == null) return NotFound();
         return movie;
     }
-
     [HttpPost("movies")]
     public async Task<IActionResult> CreateMovie(MovieDto movieDto)
     {
-        var created = await _service.AddAsync(movieDto);
+        var movie = new Movie
+        {
+            Title = movieDto.Title,
+            Genre = movieDto.Genre,
+            Duration = movieDto.Duration,
+            releasedate = movieDto.releasedate
+        };
+
+        var created = await _service.AddAsync(movie);
         return CreatedAtAction(nameof(GetMovieById), new { id = created.Movieid }, created);
     }
+
+
 
     [HttpPut("movies/{id}")]
     public async Task<IActionResult> UpdateMovie(int id, MovieDto movieDto)
@@ -94,7 +103,8 @@ public class MovieController : ControllerBase
     }
 
     [HttpGet("showinstances")]
-    public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() => await _service.GetAllShowinstancesAsync();
+    public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() =>
+     await _service.GetAllShowinstancesAsync();
 
     [HttpGet("showinstances/{id}")]
     public async Task<ActionResult<Showinstance>> GetShowinstanceById(int id)
@@ -105,27 +115,32 @@ public class MovieController : ControllerBase
     }
 
     [HttpPost("showinstances")]
-    public async Task<ActionResult> CreateShowinstance(Showinstance instance)
+    public async Task<ActionResult> CreateShowinstance([FromBody] ShowinstanceDto dto)
     {
-        await _service.AddShowinstanceAsync(instance);
-        return CreatedAtAction(nameof(GetShowinstanceById), new { id = instance.Showinstanceid }, instance);
+        try
+        {
+            var instance = await _service.AddShowinstanceAsync(dto);
+            return CreatedAtAction(nameof(GetShowinstanceById), new { id = instance.Showinstanceid }, instance);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPut("showinstances/{id}")]
-    public async Task<ActionResult> UpdateShowinstance(int id, Showinstance instance)
+    public async Task<ActionResult> UpdateShowinstance(int id, [FromBody] ShowinstanceDto dto)
     {
-        if (id != instance.Showinstanceid) return BadRequest();
-        await _service.UpdateShowinstanceAsync(instance);
+        var updated = await _service.UpdateShowinstanceAsync(id, dto);
+        if (!updated) return NotFound();
         return NoContent();
     }
 
     [HttpDelete("showinstances/{id}")]
     public async Task<ActionResult> DeleteShowinstance(int id)
     {
-        var instance = await _service.GetShowinstanceByIdAsync(id);
-        if (instance == null) return NotFound();
-        await _service.DeleteShowinstanceAsync(instance);
+        var deleted = await _service.DeleteShowinstanceAsync(id);
+        if (!deleted) return NotFound();
         return NoContent();
     }
 }
-

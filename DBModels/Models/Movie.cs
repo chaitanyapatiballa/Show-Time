@@ -21,4 +21,5 @@ public partial class Movie
 
     public virtual ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
 
+
 }

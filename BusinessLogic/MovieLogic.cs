@@ -20,18 +20,11 @@ public class MovieLogic
     public async Task<List<Movie>> GetAllAsync() => await _repository.GetAllAsync();
     public async Task<Movie?> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
 
-    public async Task<Movie> AddAsync(MovieDto dto)
+    public async Task<Movie> AddAsync(Movie movie)
     {
-        var movie = new Movie
-        {
-            Title = dto.Title,
-            Duration = dto.Duration,
-            Genre = dto.Genre,
-            releasedate = dto.releasedate
-        };
-
-        return await _repository.AddAsync(movie);
+        return await _repository.AddMovieAsync(movie);
     }
+
     public async Task UpdateAsync(int id, MovieDto dto)
     {
         var movie = await _repository.GetByIdAsync(id);
@@ -115,18 +108,53 @@ public class MovieLogic
     }
 
     // Showinstance
+
+    // Showinstance - Business Logic Layer
     public async Task<List<Showinstance>> GetAllShowinstancesAsync() =>
         await _repository.GetAllShowinstancesAsync();
 
     public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) =>
         await _repository.GetShowinstanceByIdAsync(id);
 
-    public async Task AddShowinstanceAsync(Showinstance instance) =>
+    public async Task<Showinstance> AddShowinstanceAsync(ShowinstanceDto dto)
+    {
+        var showtemplate = await _context.Showtemplates.FindAsync(dto.Showtemplateid);
+        if (showtemplate == null)
+            throw new Exception("Invalid Showtemplate ID");
+
+        var instance = new Showinstance
+        {
+            Availableseats = dto.Availableseats,
+            Showdate = dto.Showdate,
+            Showtime = dto.Showtime,
+            Showtemplateid = dto.Showtemplateid
+        };
+
         await _repository.AddShowinstanceAsync(instance);
+        return instance;
+    }
 
-    public async Task UpdateShowinstanceAsync(Showinstance instance) =>
+    public async Task<bool> UpdateShowinstanceAsync(int id, ShowinstanceDto dto)
+    {
+        var instance = await _repository.GetShowinstanceByIdAsync(id);
+        if (instance == null) return false;
+
+        instance.Availableseats = dto.Availableseats;
+        instance.Showdate = dto.Showdate;
+        instance.Showtime = dto.Showtime;
+        instance.Showtemplateid = dto.Showtemplateid;
+
         await _repository.UpdateShowinstanceAsync(instance);
+        return true;
+    }
 
-    public async Task DeleteShowinstanceAsync(Showinstance instance) =>
+    public async Task<bool> DeleteShowinstanceAsync(int id)
+    {
+        var instance = await _repository.GetShowinstanceByIdAsync(id);
+        if (instance == null) return false;
+
         await _repository.DeleteShowinstanceAsync(instance);
+        return true;
+    }
+
 }

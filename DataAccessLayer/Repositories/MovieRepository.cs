@@ -4,19 +4,20 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccessLayer.Repositories;
 
 public class MovieRepository(AppDbContext context)
-{   
+{
     private readonly AppDbContext _context = context;
 
     public async Task<List<Movie>> GetAllAsync() => await _context.Movies.ToListAsync();
 
     public async Task<Movie?> GetByIdAsync(int id) => await _context.Movies.FindAsync(id);
 
-    public async Task<Movie> AddAsync(Movie movie)
-{
-    _context.Movies.Add(movie);
-    await _context.SaveChangesAsync();
-    return movie;
-}
+    public async Task<Movie> AddMovieAsync(Movie movie)
+    {
+        _context.Movies.Add(movie);
+        await _context.SaveChangesAsync();
+        return movie;
+    }
+
 
     public async Task UpdateAsync(Movie movie)
     {
@@ -42,7 +43,7 @@ public class MovieRepository(AppDbContext context)
 
     public async Task AddShowtemplateAsync(Showtemplate template)
     {
-        
+
         bool exists = await _context.MovieTheaters.AnyAsync(mt =>
             mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
 
@@ -72,22 +73,28 @@ public class MovieRepository(AppDbContext context)
     }
 
 
-    public async Task<List<Showinstance>> GetAllShowinstancesAsync() => await _context.Showinstances.ToListAsync();
-    public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) => await _context.Showinstances.FindAsync(id);
+    public async Task<List<Showinstance>> GetAllShowinstancesAsync() =>
+     await _context.Showinstances.ToListAsync();
+
+    public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) =>
+        await _context.Showinstances.FindAsync(id);
+
     public async Task AddShowinstanceAsync(Showinstance instance)
     {
         _context.Showinstances.Add(instance);
         await _context.SaveChangesAsync();
     }
+
     public async Task UpdateShowinstanceAsync(Showinstance instance)
     {
         _context.Showinstances.Update(instance);
         await _context.SaveChangesAsync();
     }
+
     public async Task DeleteShowinstanceAsync(Showinstance instance)
     {
         _context.Showinstances.Remove(instance);
         await _context.SaveChangesAsync();
     }
-}
 
+}
