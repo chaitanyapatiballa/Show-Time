@@ -19,7 +19,7 @@ public partial class Movie
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    public virtual ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+    public virtual ICollection<movietheater> MovieTheaters { get; set; } = new List<movietheater>();
 
 
 }

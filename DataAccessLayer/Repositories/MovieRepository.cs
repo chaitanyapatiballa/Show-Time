@@ -45,14 +45,14 @@ public class MovieRepository(AppDbContext context)
     {
 
         bool exists = await _context.MovieTheaters.AnyAsync(mt =>
-            mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
+            mt.movieid == template.Movieid && mt.theaterid == template.Theaterid);
 
         if (!exists)
         {
-            _context.MovieTheaters.Add(new MovieTheater
+            _context.MovieTheaters.Add(new movietheater
             {
-                Movieid = template.Movieid,
-                Theaterid = template.Theaterid
+                movieid = template.Movieid,
+                theaterid = template.Theaterid
             });
         }
 

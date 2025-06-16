@@ -28,7 +28,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Showtemplate> Showtemplates { get; set; }
 
     public virtual DbSet<Theater> Theaters { get; set; }
-    public DbSet<MovieTheater> MovieTheaters { get; set; }
+    public DbSet<movietheater> MovieTheaters { get; set; }
 
 
 
@@ -154,16 +154,21 @@ public partial class AppDbContext : DbContext
 
             entity.ToTable("showinstances");
 
-            entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
+            entity.Property(e => e.Showinstanceid)
+                .HasColumnName("showinstanceid")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.Availableseats).HasColumnName("availableseats");
             entity.Property(e => e.Showdate).HasColumnName("showdate");
             entity.Property(e => e.Showtemplateid).HasColumnName("showtemplateid");
             entity.Property(e => e.Showtime).HasColumnName("showtime");
 
-            entity.HasOne(d => d.Showtemplate).WithMany(p => p.Showinstances)
+            entity.HasOne(d => d.Showtemplate)
+                .WithMany(p => p.Showinstances)
                 .HasForeignKey(d => d.Showtemplateid)
                 .HasConstraintName("showinstances_showtemplateid_fkey");
         });
+
 
         modelBuilder.Entity<Showtemplate>(entity =>
         {
@@ -193,22 +198,22 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("showtemplates_theaterid_fkey");
         });
 
-        modelBuilder.Entity<MovieTheater>(entity =>
+        modelBuilder.Entity<movietheater>(entity =>
         {
             entity.ToTable("movietheaters");
 
-            entity.HasKey(mt => new { mt.Movieid, mt.Theaterid });
-
-            entity.Property(mt => mt.Movieid).HasColumnName("movieid");     
-            entity.Property(mt => mt.Theaterid).HasColumnName("theaterid"); 
+            entity.HasKey(mt => new { mt.movieid, mt.theaterid });
+                    
+            entity.Property(mt => mt.movieid).HasColumnName("movieid");
+            entity.Property(mt => mt.theaterid).HasColumnName("theaterid");
 
             entity.HasOne(mt => mt.Movie)
                 .WithMany(m => m.MovieTheaters)
-                .HasForeignKey(mt => mt.Movieid);
+                .HasForeignKey(mt => mt.movieid);
 
             entity.HasOne(mt => mt.Theater)
                 .WithMany(t => t.MovieTheaters)
-                .HasForeignKey(mt => mt.Theaterid);
+                .HasForeignKey(mt => mt.theaterid);
         });
 
 
