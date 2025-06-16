@@ -21,7 +21,10 @@ public class TheaterController(TheaterLogic service) : ControllerBase
             Theaterid = t.Theaterid,
             Name = t.Name,
             Location = t.Location,
-            MovieIds = t.MovieTheaters.Select(mt => mt.movieid).ToList()
+            MovieIds = t.MovieTheaters
+                        .Where(mt => mt.Movieid != null)
+                        .Select(mt => mt.Movieid!.Value)
+                        .ToList()
         }).ToList();
 
         return dtoList;
@@ -39,7 +42,10 @@ public class TheaterController(TheaterLogic service) : ControllerBase
             Theaterid = theater.Theaterid,
             Name = theater.Name,
             Location = theater.Location,
-            MovieIds = theater.MovieTheaters.Select(mt => mt.movieid).ToList()
+            MovieIds = theater.MovieTheaters
+                              .Where(mt => mt.Movieid != null)
+                              .Select(mt => mt.Movieid!.Value)
+                              .ToList()
         };
 
         return dto;

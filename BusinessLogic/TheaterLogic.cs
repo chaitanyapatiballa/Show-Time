@@ -28,9 +28,9 @@ public class TheaterLogic
                 .Where(m => movieIds.Contains(m.Movieid))
                 .ToListAsync();
 
-            theater.MovieTheaters = movies.Select(m => new movietheater
+            theater.MovieTheaters = movies.Select(m => new MovieTheater
             {
-                movieid = m.Movieid,
+                Movieid = m.Movieid,
                 Theater = theater
             }).ToList();
         }
