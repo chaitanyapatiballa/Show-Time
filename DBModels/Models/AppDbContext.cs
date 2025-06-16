@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBModels.Models;
@@ -28,7 +27,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Showtemplate> Showtemplates { get; set; }
 
     public virtual DbSet<Theater> Theaters { get; set; }
-    public DbSet<movietheater> MovieTheaters { get; set; }
+    public DbSet<MovieTheater> MovieTheaters { get; set; }
 
 
 
@@ -198,25 +197,23 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("showtemplates_theaterid_fkey");
         });
 
-        modelBuilder.Entity<movietheater>(entity =>
+        modelBuilder.Entity<MovieTheater>(entity =>
         {
             entity.ToTable("movietheaters");
 
-            entity.HasKey(mt => new { mt.movieid, mt.theaterid });
-                    
-            entity.Property(mt => mt.movieid).HasColumnName("movieid");
-            entity.Property(mt => mt.theaterid).HasColumnName("theaterid");
+            entity.HasKey(mt => new { mt.Movieid, mt.Theaterid });
+
+            entity.Property(mt => mt.Movieid).HasColumnName("movieid");
+            entity.Property(mt => mt.Theaterid).HasColumnName("theaterid");
 
             entity.HasOne(mt => mt.Movie)
                 .WithMany(m => m.MovieTheaters)
-                .HasForeignKey(mt => mt.movieid);
+                .HasForeignKey(mt => mt.Movieid);
 
             entity.HasOne(mt => mt.Theater)
                 .WithMany(t => t.MovieTheaters)
-                .HasForeignKey(mt => mt.theaterid);
+                .HasForeignKey(mt => mt.Theaterid);
         });
-
-
 
 
         modelBuilder.Entity<Theater>(entity =>
@@ -226,6 +223,9 @@ public partial class AppDbContext : DbContext
             entity.ToTable("theaters");
 
             entity.Property(e => e.Theaterid).HasColumnName("theaterid");
+            entity.Property(e => e.Capacity)
+                .HasDefaultValue(100)
+                .HasColumnName("capacity");
             entity.Property(e => e.Location)
                 .HasMaxLength(100)
                 .HasColumnName("location");

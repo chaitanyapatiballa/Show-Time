@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DBModels.Models;
 
-namespace DBModels.Models;
-
-public partial class movietheater
+public class MovieTheater
 {
-    public int movieid { get; set; }
+    public int Movieid { get; set; }
+    public int Theaterid { get; set; }
+
     public Movie Movie { get; set; } = null!;
-
-    public int theaterid { get; set; }
-    public Theater Theater { get; set; }
-
+    public Theater Theater { get; set; } = null!;
 }
