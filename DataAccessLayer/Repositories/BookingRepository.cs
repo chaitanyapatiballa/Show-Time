@@ -1,15 +1,11 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookingService.Repositories;
-
-public class BookingRepository
+namespace DataAccessLayer.Repositories;
+    
+public class BookingRepository(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-    public BookingRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Booking> AddBookingAsync(Booking booking)
     {

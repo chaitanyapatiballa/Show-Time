@@ -1,19 +1,15 @@
-﻿using DBModels.Models;
+﻿using BusinessLogic;
+using DBModels.Dto;
+using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
-using MovieService.Services;
 
 namespace MovieService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MovieController : ControllerBase
+public class MovieController(MovieLogic service) : ControllerBase
 {
-    private readonly IMovieService _service;
-
-    public MovieController(IMovieService service)
-    {
-        _service = service;
-    }
+    private readonly MovieLogic _service = service;
 
     [HttpGet("movies")]
     public async Task<ActionResult<List<Movie>>> GetAllMovies() => await _service.GetAllAsync();
@@ -27,10 +23,10 @@ public class MovieController : ControllerBase
     }
 
     [HttpPost("movies")]
-    public async Task<ActionResult> CreateMovie(Movie movie)
+    public async Task<IActionResult> CreateMovie(MovieDto movieDto)
     {
-        await _service.AddAsync(movie);
-        return CreatedAtAction(nameof(GetMovieById), new { id = movie.Movieid }, movie);
+        var created = await _service.AddAsync(movieDto);
+        return CreatedAtAction(nameof(GetMovieById), new { id = created.Movieid }, created);
     }
 
     [HttpPut("movies/{id}")]

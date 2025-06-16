@@ -1,14 +1,10 @@
 ﻿using DBModels.Models;
 
-namespace BookingService.Repositories;
+namespace DataAccessLayer.Repositories;
 
-public class BillingsummaryRepository
+public class BillingsummaryRepository(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-    public BillingsummaryRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Billingsummary> AddSummaryAsync(Billingsummary summary)
     {

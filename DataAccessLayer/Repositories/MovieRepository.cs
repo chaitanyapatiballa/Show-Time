@@ -1,26 +1,22 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MovieService.Repositories;
+namespace DataAccessLayer.Repositories;
 
-public class MovieRepository
-{
-    private readonly AppDbContext _context;
-
-    public MovieRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+public class MovieRepository(AppDbContext context)
+{   
+    private readonly AppDbContext _context = context;
 
     public async Task<List<Movie>> GetAllAsync() => await _context.Movies.ToListAsync();
 
     public async Task<Movie?> GetByIdAsync(int id) => await _context.Movies.FindAsync(id);
 
-    public async Task AddAsync(Movie movie)
-    {
-        _context.Movies.Add(movie);
-        await _context.SaveChangesAsync();
-    }
+    public async Task<Movie> AddAsync(Movie movie)
+{
+    _context.Movies.Add(movie);
+    await _context.SaveChangesAsync();
+    return movie;
+}
 
     public async Task UpdateAsync(Movie movie)
     {

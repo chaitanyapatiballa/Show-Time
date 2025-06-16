@@ -1,7 +1,7 @@
-﻿using BookingService.Repositories;
+﻿using BusinessLogic;
+using DataAccessLayer.Repositories;
 using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
-using PaymentService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Dependency Injection
 builder.Services.AddScoped<PaymentRepository>();
-builder.Services.AddScoped<IPaymentService>();
+builder.Services.AddScoped<PaymentLogic>();
 
 var app = builder.Build();
 

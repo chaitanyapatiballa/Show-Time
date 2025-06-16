@@ -1,16 +1,11 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TheaterService.Repositories;
+namespace DataAccessLayer.Repositories; 
 
-public class TheaterRepository
+public class TheaterRepository(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public TheaterRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<List<Theater>> GetAllAsync()
     {

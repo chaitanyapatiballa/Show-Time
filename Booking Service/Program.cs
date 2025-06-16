@@ -1,5 +1,5 @@
-﻿using BookingService.Repositories;
-using BookingService.Services;
+﻿using BusinessLogic;
+using DataAccessLayer.Repositories;
 using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<BillingsummaryRepository>();
 builder.Services.AddScoped<PaymentRepository>();
-builder.Services.AddScoped<IBookingService>();
+builder.Services.AddScoped<BookingLogic>();
 
 builder.Services.AddHttpClient();
 

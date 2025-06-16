@@ -1,18 +1,13 @@
 ﻿using BookingService.DTOs;
-using BookingService.Repositories;
+using DataAccessLayer.Repositories;
 using DBModels.Models;
 
 
-namespace PaymentService.Services;
+namespace BusinessLogic;
 
-public class IPaymentService
+public class PaymentLogic(PaymentRepository repository)
 {
-    private readonly PaymentRepository _repository;
-
-    public IPaymentService(PaymentRepository repository)
-    {
-        _repository = repository;
-    }
+    private readonly PaymentRepository _repository = repository;
 
     public async Task<Payment> ProcessPaymentAsync(PaymentDto dto)   
     {

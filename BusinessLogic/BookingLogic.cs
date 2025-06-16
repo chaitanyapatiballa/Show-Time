@@ -1,28 +1,20 @@
 ﻿using BookingService.DTOs;
-using BookingService.Repositories;
+using DataAccessLayer.Repositories;
 using DBModels.Models;
 using System.Net.Http.Json;
 
-namespace BookingService.Services;
+namespace BusinessLogic;
 
-public class IBookingService
+public class BookingLogic(
+    BookingRepository bookingRepo,
+    BillingsummaryRepository summaryRepo,
+    PaymentRepository paymentRepo,
+    IHttpClientFactory httpClientFactory)
 {
-    private readonly BookingRepository _bookingRepo;
-    private readonly BillingsummaryRepository _summaryRepo;
-    private readonly PaymentRepository _paymentRepo;
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public IBookingService( 
-        BookingRepository bookingRepo,
-        BillingsummaryRepository summaryRepo,
-        PaymentRepository paymentRepo,
-        IHttpClientFactory httpClientFactory)
-    {
-        _bookingRepo = bookingRepo;
-        _summaryRepo = summaryRepo;
-        _paymentRepo = paymentRepo;
-        _httpClientFactory = httpClientFactory;
-    }
+    private readonly BookingRepository _bookingRepo = bookingRepo;
+    private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
+    private readonly PaymentRepository _paymentRepo = paymentRepo;
+    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
     public async Task<bool> ValidateMovieAsync(int movieId)
     {

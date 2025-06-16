@@ -1,7 +1,7 @@
-﻿using DBModels.Models;
+﻿using BusinessLogic;
+using DataAccessLayer.Repositories;
+using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
-using MovieService.Repositories;
-using MovieService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register custom services and repositories
 builder.Services.AddScoped<MovieRepository>();
-builder.Services.AddScoped<IMovieService>();
+builder.Services.AddScoped<MovieLogic>();
 
 var app = builder.Build();
 

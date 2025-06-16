@@ -1,21 +1,14 @@
 ﻿using BookingService.DTOs;
+using BusinessLogic;
 using Microsoft.AspNetCore.Mvc;
-
-
-using PaymentService.Services;
 
 namespace PaymentService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PaymentController : ControllerBase
+public class PaymentController(PaymentLogic service) : ControllerBase
 {
-    private readonly IPaymentService _service;
-
-    public PaymentController(IPaymentService service)
-    {
-        _service = service;
-    }
+    private readonly PaymentLogic _service = service;
 
     [HttpPost("pay")]
     public async Task<IActionResult> Pay([FromBody] PaymentDto dto)

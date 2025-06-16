@@ -109,6 +109,10 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Duration)
                 .HasMaxLength(50)
                 .HasColumnName("duration");
+            entity.Property(e => e.Genre)
+                .HasMaxLength(100)
+                .HasColumnName("genre");
+            entity.Property(e => e.releasedate).HasColumnName("releasedate");
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");

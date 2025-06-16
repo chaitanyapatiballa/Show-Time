@@ -1,15 +1,11 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookingService.Repositories;
+namespace DataAccessLayer.Repositories;
 
-public class PaymentRepository
+public class PaymentRepository(AppDbContext context)    
 {
-    private readonly AppDbContext _context;
-    public PaymentRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<Payment> AddPaymentAsync(Payment payment)
     {

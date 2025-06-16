@@ -1,20 +1,15 @@
-﻿using DBModels.Models;
+﻿using BusinessLogic;
+using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 using TheaterService.DTOs;
-using TheaterService.Services;
 
 namespace TheaterService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TheaterController : ControllerBase
+public class TheaterController(TheaterLogic service) : ControllerBase
 {
-    private readonly ITheaterService _service;
-
-    public TheaterController(ITheaterService service)
-    {
-        _service = service;
-    }
+    private readonly TheaterLogic _service = service;
 
     [HttpGet]
     public async Task<ActionResult<List<Theater>>> GetAll()
