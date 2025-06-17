@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DBModels.Models;
+namespace AuthService.Models;
 
 public partial class Showinstance
 {

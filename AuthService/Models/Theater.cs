@@ -1,6 +1,7 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
 
-namespace DBModels.Models;
+namespace AuthService.Models;
 
 public partial class Theater
 {
@@ -18,9 +19,5 @@ public partial class Theater
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    [JsonIgnore]
-    public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
-
-
+    public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
 }
-
