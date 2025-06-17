@@ -88,30 +88,30 @@ public class TheaterLogic
     {
         var template = new Showtemplate
         {
-            Baseprice = dto.Baseprice,
-            Format = dto.Format,
-            Language = dto.Language,
             Movieid = dto.Movieid,
-            Theaterid = dto.Theaterid
+            Theaterid = dto.Theaterid,
+            Language = dto.Language,
+            Format = dto.Format,
+            Baseprice = dto.Baseprice
         };
 
-        bool exists = await _context.MovieTheaters.AnyAsync(mt =>
-            mt.Movieid == dto.Movieid && mt.Theaterid == dto.Theaterid);
+        bool linkExists = await _context.MovieTheaters.AnyAsync(mt =>
+            mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
 
-        if (!exists)
+        if (!linkExists)
         {
             _context.MovieTheaters.Add(new MovieTheater
             {
-                Movieid = dto.Movieid,
-                Theaterid = dto.Theaterid
+                Movieid = template.Movieid.Value,
+                Theaterid = template.Theaterid.Value
             });
         }
 
         _context.Showtemplates.Add(template);
         await _context.SaveChangesAsync();
-
         return template;
     }
+
 
     public async Task UpdateShowtemplateAsync(int id, ShowtemplateDto dto)
     {
@@ -139,7 +139,7 @@ public class TheaterLogic
 
     // Showinstance
 
-    // Showinstance - Business Logic Layer
+    
     public async Task<List<Showinstance>> GetAllShowinstancesAsync() =>
         await _repository.GetAllShowinstancesAsync();
 
@@ -148,42 +148,80 @@ public class TheaterLogic
 
     public async Task<Showinstance> AddShowinstanceAsync(ShowinstanceDto dto)
     {
-        var showtemplate = await _context.Showtemplates.FindAsync(dto.Showtemplateid);
+        var showtemplate = await _context.Showtemplates
+            .Include(st => st.Theater)
+            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid);
+
         if (showtemplate == null)
             throw new Exception("Invalid Showtemplate ID");
 
-        var instance = new Showinstance
+        var showinstance = new Showinstance
         {
-            Availableseats = dto.Availableseats,
+            Showtemplateid = dto.Showtemplateid,
             Showdate = dto.Showdate,
             Showtime = dto.Showtime,
-            Showtemplateid = dto.Showtemplateid
+            Availableseats = showtemplate.Theater.Capacity
         };
 
-        await _repository.AddShowinstanceAsync(instance);
-        return instance;
-    }
+        _context.Showinstances.Add(showinstance);
+        await _context.SaveChangesAsync();
 
+        var theaterSeats = await _context.Seats
+            .Where(s => s.Theaterid == showtemplate.Theaterid)
+            .ToListAsync();
+
+        var seatStatuses = theaterSeats.Select(seat => new Showseatstatus
+        {
+            Seatid = seat.Seatid,
+            Isbooked = false,
+            Showinstanceid = showinstance.Showinstanceid
+        }).ToList();
+
+        _context.Showseatstatuses.AddRange(seatStatuses);
+        await _context.SaveChangesAsync();
+
+        return showinstance;
+    }
     public async Task<bool> UpdateShowinstanceAsync(int id, ShowinstanceDto dto)
     {
         var instance = await _repository.GetShowinstanceByIdAsync(id);
         if (instance == null) return false;
 
-        instance.Availableseats = dto.Availableseats;
+        var showtemplate = await _context.Showtemplates
+            .Include(st => st.Theater)
+            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid);
+
+        if (showtemplate == null)
+            throw new Exception("Invalid Showtemplate ID");
+
+        instance.Showtemplateid = dto.Showtemplateid;
         instance.Showdate = dto.Showdate;
         instance.Showtime = dto.Showtime;
-        instance.Showtemplateid = dto.Showtemplateid;
+
+        //  AvailableSeats from theater capacity
+        instance.Availableseats = showtemplate.Theater.Capacity;
 
         await _repository.UpdateShowinstanceAsync(instance);
         return true;
     }
+
 
     public async Task<bool> DeleteShowinstanceAsync(int id)
     {
         var instance = await _repository.GetShowinstanceByIdAsync(id);
         if (instance == null) return false;
 
+        // Delete related seat statuses first
+        var seatStatuses = await _context.Showseatstatuses
+            .Where(s => s.Showinstanceid == id)
+            .ToListAsync();
+
+        _context.Showseatstatuses.RemoveRange(seatStatuses);
+
         await _repository.DeleteShowinstanceAsync(instance);
+        await _context.SaveChangesAsync();
+
         return true;
     }
+
 }

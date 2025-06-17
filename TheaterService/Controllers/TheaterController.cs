@@ -3,7 +3,6 @@ using DBModels.Dto;
 using DBModels.Models;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace TheaterService.Controllers
 {
     [ApiController]
@@ -17,14 +16,12 @@ namespace TheaterService.Controllers
             _logic = logic;
         }
 
-
         [HttpGet]
         public async Task<ActionResult<List<Theater>>> GetAllTheaters()
         {
             var theaters = await _logic.GetAllAsync();
             return Ok(theaters);
         }
-
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Theater>> GetTheaterById(int id)
@@ -35,7 +32,6 @@ namespace TheaterService.Controllers
 
             return Ok(theater);
         }
-
 
         [HttpPost]
         public async Task<ActionResult> CreateTheater([FromBody] TheaterDto dto)
@@ -52,7 +48,6 @@ namespace TheaterService.Controllers
             return CreatedAtAction(nameof(GetTheaterById), new { id = theater.Theaterid }, theater);
         }
 
-
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateTheater(int id, [FromBody] TheaterDto dto)
         {
@@ -68,7 +63,6 @@ namespace TheaterService.Controllers
             return NoContent();
         }
 
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteTheater(int id)
         {
@@ -82,7 +76,7 @@ namespace TheaterService.Controllers
 
         [HttpGet("showtemplates")]
         public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates()
-        => await _logic.GetAllShowtemplatesAsync();
+            => await _logic.GetAllShowtemplatesAsync();
 
         [HttpGet("showtemplates/{id}")]
         public async Task<ActionResult<Showtemplate>> GetShowtemplateById(int id)
@@ -98,6 +92,7 @@ namespace TheaterService.Controllers
             var template = await _logic.AddShowtemplateAsync(dto);
             return CreatedAtAction(nameof(GetShowtemplateById), new { id = template.Showtemplateid }, template);
         }
+
         [HttpPut("showtemplates/{id}")]
         public async Task<ActionResult> UpdateShowtemplate(int id, ShowtemplateDto dto)
         {
@@ -107,7 +102,6 @@ namespace TheaterService.Controllers
             await _logic.UpdateShowtemplateAsync(id, dto);
             return NoContent();
         }
-
 
         [HttpDelete("showtemplates/{id}")]
         public async Task<ActionResult> DeleteShowtemplate(int id)
@@ -120,7 +114,7 @@ namespace TheaterService.Controllers
 
         [HttpGet("showinstances")]
         public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() =>
-         await _logic.GetAllShowinstancesAsync();
+            await _logic.GetAllShowinstancesAsync();
 
         [HttpGet("showinstances/{id}")]
         public async Task<ActionResult<Showinstance>> GetShowinstanceById(int id)
@@ -161,4 +155,3 @@ namespace TheaterService.Controllers
         }
     }
 }
-

@@ -53,22 +53,10 @@ public class TheaterRepository
 
     public async Task AddShowtemplateAsync(Showtemplate template)
     {
-
-        bool exists = await _context.MovieTheaters.AnyAsync(mt =>
-            mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
-
-        if (!exists)
-        {
-            _context.MovieTheaters.Add(new MovieTheater
-            {
-                Movieid = (int)template.Movieid,
-                Theaterid = (int)template.Theaterid
-            });
-        }
-
         _context.Showtemplates.Add(template);
         await _context.SaveChangesAsync();
     }
+
 
     public async Task UpdateShowtemplateAsync(Showtemplate template)
     {
