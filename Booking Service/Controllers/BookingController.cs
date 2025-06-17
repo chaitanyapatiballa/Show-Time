@@ -1,14 +1,21 @@
-﻿using BookingService.DTOs;
+﻿using Booking_Service.Controllers;
+using BookingService.DTOs;
 using BusinessLogic;
 using Microsoft.AspNetCore.Mvc;
+using DBModels.Dto;
 
-namespace Booking_Service.Controllers
-{   
+namespace BookingService.Controllers 
+{
     [ApiController]
     [Route("api/[controller]")]
-    public class BookingController(BookingLogic service) : ControllerBase
+    public class BookingController : ControllerBase 
     {
-        private readonly BookingLogic _service = service;
+        private readonly BookingLogic _service;
+
+        public BookingController(BookingLogic service) 
+        {
+            _service = service;
+        }
 
         [HttpPost("create-booking")]
         public async Task<IActionResult> CreateBooking(BookingDto dto)

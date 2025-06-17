@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DBModels.Models;
+﻿namespace DBModels.Models;
 
 public partial class Theater
 {

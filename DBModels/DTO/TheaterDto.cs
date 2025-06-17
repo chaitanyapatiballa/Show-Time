@@ -1,7 +1,7 @@
 ﻿
 using DBModels.Models;
 
-namespace TheaterService.DTOs;
+namespace DBModels.Dto;
 
 public class TheaterDto
 {

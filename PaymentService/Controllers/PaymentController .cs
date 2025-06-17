@@ -1,26 +1,33 @@
 ﻿using BookingService.DTOs;
 using BusinessLogic;
+using DBModels.Dto;
 using Microsoft.AspNetCore.Mvc;
 
-namespace PaymentService.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class PaymentController(PaymentLogic service) : ControllerBase
+namespace PaymentService.Controllers
 {
-    private readonly PaymentLogic _service = service;
-
-    [HttpPost("pay")]
-    public async Task<IActionResult> Pay([FromBody] PaymentDto dto)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PaymentController : ControllerBase
     {
-        var result = await _service.ProcessPaymentAsync(dto);
-        return Ok(result);
-    }
+        private readonly PaymentLogic _service;
 
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetUserPayments(int userId)
-    {
-        var payments = await _service.GetUserPaymentsAsync(userId);
-        return Ok(payments);
+        public PaymentController(PaymentLogic service)
+        {
+            _service = service;
+        }
+
+        [HttpPost("pay")]
+        public async Task<IActionResult> Pay([FromBody] PaymentDto dto)
+        {
+            var result = await _service.ProcessPaymentAsync(dto);
+            return Ok(result);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetUserPayments(int userId)
+        {
+            var payments = await _service.GetUserPaymentsAsync(userId);
+            return Ok(payments);
+        }
     }
 }

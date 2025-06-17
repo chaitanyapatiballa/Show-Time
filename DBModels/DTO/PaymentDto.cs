@@ -1,4 +1,4 @@
-﻿namespace BookingService.DTOs;
+﻿namespace DBModels.Dto;
 
 public class PaymentDto
 {

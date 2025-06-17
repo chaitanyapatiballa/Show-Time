@@ -1,4 +1,4 @@
-﻿namespace BookingService.DTOs;
+﻿namespace Booking_Service.Controllers;
 
 public class BookingDto
 {

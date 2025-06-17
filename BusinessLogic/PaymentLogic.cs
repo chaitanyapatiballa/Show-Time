@@ -1,5 +1,6 @@
-﻿using BookingService.DTOs;
+﻿
 using DataAccessLayer.Repositories;
+using DBModels.Dto;
 using DBModels.Models;
 
 namespace BusinessLogic

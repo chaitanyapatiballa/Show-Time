@@ -1,5 +1,7 @@
-﻿using BookingService.DTOs;
+﻿using Booking_Service.Controllers;
+using BookingService.DTOs;
 using DataAccessLayer.Repositories;
+using DBModels.Dto;
 using DBModels.Models;
 using System.Net.Http.Json;
 
