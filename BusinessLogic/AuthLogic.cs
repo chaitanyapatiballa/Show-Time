@@ -1,4 +1,5 @@
-﻿using DataAccessLayer.Repositories;
+﻿using AuthService.Repositories;
+using DataAccessLayer.Repositories;
 using DBModels.Dto;
 using DBModels.Models;
 using Microsoft.Extensions.Configuration;
@@ -10,14 +11,14 @@ using System.Text;
 
 namespace BusinessLogic;
 
-public class AuthLogic(UserRepository userRepo, IConfiguration config)
+public class AuthLogic(AuthRepository userRepo, IConfiguration config)
 {
-    private readonly UserRepository _userRepo = userRepo;
+    private readonly AuthRepository _userRepo = userRepo;
     private readonly IConfiguration _config = config;
 
     public async Task<bool> RegisterAsync(RegisterDto dto)
     {
-        if (await _userRepo.GetUserByEmailAsync(dto.Email) != null)
+        if (await _userRepo.GetByEmailAsync(dto.Email) != null)
             return false;
 
         using var hmac = new HMACSHA256();
@@ -35,7 +36,7 @@ public class AuthLogic(UserRepository userRepo, IConfiguration config)
 
     public async Task<string?> LoginAsync(LoginDto dto)
     {
-        var user = await _userRepo.GetUserByEmailAsync(dto.Email);
+        var user = await _userRepo.GetByEmailAsync(dto.Email);
         if (user == null)
             return null;
 

@@ -1,13 +1,13 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories;
+namespace AuthService.Repositories;
 
-public class UserRepository(AppDbContext context)
+public class AuthRepository(AppDbContext context)
 {
     private readonly AppDbContext _context = context;
 
-    public async Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
