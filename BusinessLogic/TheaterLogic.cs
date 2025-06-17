@@ -1,4 +1,5 @@
 ﻿using DataAccessLayer.Repositories;
+using DBModels.Dto;
 using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -74,5 +75,115 @@ public class TheaterLogic
     public async Task DeleteAsync(Theater theater)
     {
         await _repository.DeleteAsync(theater);
+    }
+
+    // Showtemplate
+    public async Task<List<Showtemplate>> GetAllShowtemplatesAsync() =>
+        await _repository.GetAllShowtemplatesAsync();
+
+    public async Task<Showtemplate?> GetShowtemplateByIdAsync(int id) =>
+        await _repository.GetShowtemplateByIdAsync(id);
+
+    public async Task<Showtemplate> AddShowtemplateAsync(ShowtemplateDto dto)
+    {
+        var template = new Showtemplate
+        {
+            Baseprice = dto.Baseprice,
+            Format = dto.Format,
+            Language = dto.Language,
+            Movieid = dto.Movieid,
+            Theaterid = dto.Theaterid
+        };
+
+        bool exists = await _context.MovieTheaters.AnyAsync(mt =>
+            mt.Movieid == dto.Movieid && mt.Theaterid == dto.Theaterid);
+
+        if (!exists)
+        {
+            _context.MovieTheaters.Add(new MovieTheater
+            {
+                Movieid = dto.Movieid,
+                Theaterid = dto.Theaterid
+            });
+        }
+
+        _context.Showtemplates.Add(template);
+        await _context.SaveChangesAsync();
+
+        return template;
+    }
+
+    public async Task UpdateShowtemplateAsync(int id, ShowtemplateDto dto)
+    {
+        var existing = await _context.Showtemplates.FindAsync(id);
+        if (existing == null) return;
+
+        existing.Baseprice = dto.Baseprice;
+        existing.Format = dto.Format;
+        existing.Language = dto.Language;
+        existing.Movieid = dto.Movieid;
+        existing.Theaterid = dto.Theaterid;
+
+        _context.Showtemplates.Update(existing);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteShowtemplateAsync(int id)
+    {
+        var existing = await _repository.GetShowtemplateByIdAsync(id);
+        if (existing != null)
+        {
+            await _repository.DeleteShowtemplateAsync(existing);
+        }
+    }
+
+    // Showinstance
+
+    // Showinstance - Business Logic Layer
+    public async Task<List<Showinstance>> GetAllShowinstancesAsync() =>
+        await _repository.GetAllShowinstancesAsync();
+
+    public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) =>
+        await _repository.GetShowinstanceByIdAsync(id);
+
+    public async Task<Showinstance> AddShowinstanceAsync(ShowinstanceDto dto)
+    {
+        var showtemplate = await _context.Showtemplates.FindAsync(dto.Showtemplateid);
+        if (showtemplate == null)
+            throw new Exception("Invalid Showtemplate ID");
+
+        var instance = new Showinstance
+        {
+            Availableseats = dto.Availableseats,
+            Showdate = dto.Showdate,
+            Showtime = dto.Showtime,
+            Showtemplateid = dto.Showtemplateid
+        };
+
+        await _repository.AddShowinstanceAsync(instance);
+        return instance;
+    }
+
+    public async Task<bool> UpdateShowinstanceAsync(int id, ShowinstanceDto dto)
+    {
+        var instance = await _repository.GetShowinstanceByIdAsync(id);
+        if (instance == null) return false;
+
+        instance.Availableseats = dto.Availableseats;
+        instance.Showdate = dto.Showdate;
+        instance.Showtime = dto.Showtime;
+        instance.Showtemplateid = dto.Showtemplateid;
+
+        await _repository.UpdateShowinstanceAsync(instance);
+        return true;
+    }
+
+    public async Task<bool> DeleteShowinstanceAsync(int id)
+    {
+        var instance = await _repository.GetShowinstanceByIdAsync(id);
+        if (instance == null) return false;
+
+        await _repository.DeleteShowinstanceAsync(instance);
+        return true;
     }
 }

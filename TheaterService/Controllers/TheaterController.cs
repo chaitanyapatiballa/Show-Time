@@ -79,5 +79,86 @@ namespace TheaterService.Controllers
             await _logic.DeleteAsync(existing);
             return NoContent();
         }
+
+        [HttpGet("showtemplates")]
+        public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates()
+        => await _logic.GetAllShowtemplatesAsync();
+
+        [HttpGet("showtemplates/{id}")]
+        public async Task<ActionResult<Showtemplate>> GetShowtemplateById(int id)
+        {
+            var template = await _logic.GetShowtemplateByIdAsync(id);
+            if (template == null) return NotFound();
+            return template;
+        }
+
+        [HttpPost("showtemplates")]
+        public async Task<ActionResult> CreateShowtemplate(ShowtemplateDto dto)
+        {
+            var template = await _logic.AddShowtemplateAsync(dto);
+            return CreatedAtAction(nameof(GetShowtemplateById), new { id = template.Showtemplateid }, template);
+        }
+        [HttpPut("showtemplates/{id}")]
+        public async Task<ActionResult> UpdateShowtemplate(int id, ShowtemplateDto dto)
+        {
+            var existing = await _logic.GetShowtemplateByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            await _logic.UpdateShowtemplateAsync(id, dto);
+            return NoContent();
+        }
+
+
+        [HttpDelete("showtemplates/{id}")]
+        public async Task<ActionResult> DeleteShowtemplate(int id)
+        {
+            var template = await _logic.GetShowtemplateByIdAsync(id);
+            if (template == null) return NotFound();
+            await _logic.DeleteShowtemplateAsync(id);
+            return NoContent();
+        }
+
+        [HttpGet("showinstances")]
+        public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() =>
+         await _logic.GetAllShowinstancesAsync();
+
+        [HttpGet("showinstances/{id}")]
+        public async Task<ActionResult<Showinstance>> GetShowinstanceById(int id)
+        {
+            var instance = await _logic.GetShowinstanceByIdAsync(id);
+            if (instance == null) return NotFound();
+            return instance;
+        }
+
+        [HttpPost("showinstances")]
+        public async Task<ActionResult> CreateShowinstance([FromBody] ShowinstanceDto dto)
+        {
+            try
+            {
+                var instance = await _logic.AddShowinstanceAsync(dto);
+                return CreatedAtAction(nameof(GetShowinstanceById), new { id = instance.Showinstanceid }, instance);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("showinstances/{id}")]
+        public async Task<ActionResult> UpdateShowinstance(int id, [FromBody] ShowinstanceDto dto)
+        {
+            var updated = await _logic.UpdateShowinstanceAsync(id, dto);
+            if (!updated) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("showinstances/{id}")]
+        public async Task<ActionResult> DeleteShowinstance(int id)
+        {
+            var deleted = await _logic.DeleteShowinstanceAsync(id);
+            if (!deleted) return NotFound();
+            return NoContent();
+        }
     }
 }
+
