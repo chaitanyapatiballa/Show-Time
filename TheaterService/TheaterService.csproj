@@ -24,8 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
-    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
+   
+	  <ProjectReference Include="..\BusinessLogic\BusinessLogic.csproj" />
+
+	  <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
   </ItemGroup>
 

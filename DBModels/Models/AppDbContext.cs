@@ -35,6 +35,7 @@ public partial class AppDbContext : DbContext
 
     public DbSet<MovieTheater> MovieTheaters { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=showtime_db;Username=postgres;Password=Admin");
@@ -257,18 +258,18 @@ public partial class AppDbContext : DbContext
         {
             entity.ToTable("movietheaters");
 
-            entity.HasKey(mt => new { mt.movieid, mt.theaterid });
+            entity.HasKey(mt => new { mt.Movieid, mt.Theaterid });
 
-            entity.Property(mt => mt.movieid).HasColumnName("movieid");
-            entity.Property(mt => mt.theaterid).HasColumnName("theaterid");
+            entity.Property(mt => mt.Movieid).HasColumnName("movieid");
+            entity.Property(mt => mt.Theaterid).HasColumnName("theaterid");
 
             entity.HasOne(mt => mt.Movie)
                 .WithMany(m => m.MovieTheaters)
-                .HasForeignKey(mt => mt.movieid);
+                .HasForeignKey(mt => mt.Movieid);
 
             entity.HasOne(mt => mt.Theater)
                 .WithMany(t => t.MovieTheaters)
-                .HasForeignKey(mt => mt.theaterid);
+                .HasForeignKey(mt => mt.Theaterid);
         });
 
 

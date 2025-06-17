@@ -1,4 +1,6 @@
 ﻿
+using DBModels.Models;
+
 namespace TheaterService.DTOs;
 
 public class TheaterDto

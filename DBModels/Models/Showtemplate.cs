@@ -21,5 +21,5 @@ public partial class Showtemplate
 
     public virtual ICollection<Showinstance> Showinstances { get; set; } = new List<Showinstance>();
 
-    public virtual Theater? Theater { get; set; }
+    public virtual Theater Theater { get; set; }
 }

@@ -1,10 +1,12 @@
-﻿using DBModels.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DBModels.Models;
 
 public class MovieTheater
 {
-    public int? movieid { get; set; }   
-    public int? theaterid { get; set; }
-        
-    public Movie Movie { get; set; } = null!;
-    public Theater Theater { get; set; } = null!;
+    public int Movieid { get; set; }
+    public Movie Movie { get; set; }
+
+    public int Theaterid { get; set; }
+    public Theater Theater { get; set; }
 }

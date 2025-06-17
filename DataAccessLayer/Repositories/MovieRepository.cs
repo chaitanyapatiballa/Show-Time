@@ -51,8 +51,8 @@ public class MovieRepository(AppDbContext context)
         {
             _context.MovieTheaters.Add(new MovieTheater
             {
-                Movieid = template.Movieid,
-                Theaterid = template.Theaterid
+                Movieid = (int)template.Movieid,
+                Theaterid = (int)template.Theaterid
             });
         }
 
