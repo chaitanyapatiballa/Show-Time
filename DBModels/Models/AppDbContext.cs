@@ -35,7 +35,7 @@ public partial class AppDbContext : DbContext
 
     public DbSet<MovieTheater> MovieTheaters { get; set; }
 
-
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
@@ -124,7 +124,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");
-
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -239,6 +238,24 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("showtemplates_theaterid_fkey");
         });
 
+        modelBuilder.Entity<Theater>(entity =>
+        {
+            entity.HasKey(e => e.Theaterid).HasName("theaters_pkey");
+
+            entity.ToTable("theaters");
+
+            entity.Property(e => e.Theaterid).HasColumnName("theaterid");
+            entity.Property(e => e.Capacity)
+                .HasDefaultValue(100)
+                .HasColumnName("capacity");
+            entity.Property(e => e.Location)
+                .HasMaxLength(100)
+                .HasColumnName("location");
+            entity.Property(e => e.Name)
+                .HasMaxLength(100)
+                .HasColumnName("name");
+        });
+
         modelBuilder.Entity<MovieTheater>(entity =>
         {
             entity.ToTable("movietheaters");
@@ -260,23 +277,15 @@ public partial class AppDbContext : DbContext
         });
 
 
-
-        modelBuilder.Entity<Theater>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Theaterid).HasName("theaters_pkey");
+            entity.HasKey(e => e.Userid).HasName("Users_pkey");
 
-            entity.ToTable("theaters");
-
-            entity.Property(e => e.Theaterid).HasColumnName("theaterid");
-            entity.Property(e => e.Capacity)
-                .HasDefaultValue(100)
-                .HasColumnName("capacity");
-            entity.Property(e => e.Location)
-                .HasMaxLength(100)
-                .HasColumnName("location");
-            entity.Property(e => e.Name)
-                .HasMaxLength(100)
-                .HasColumnName("name");
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.Role)
+                .HasMaxLength(50)
+                .HasDefaultValueSql("'User'::character varying");
+            entity.Property(e => e.Username).HasMaxLength(100);
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -1,99 +1,39 @@
 ﻿using Booking_Service.Controllers;
-using BookingService.DTOs;
 using DataAccessLayer.Repositories;
-using DBModels.Dto;
-using DBModels.Models;
-using System.Net.Http.Json;
+using PaymentService.Repositories;
 
-namespace BusinessLogic;
 
-public class BookingLogic(
-    BookingRepository bookingRepo,
-    BillingsummaryRepository summaryRepo,
-    PaymentRepository paymentRepo,
-    IHttpClientFactory httpClientFactory)
+namespace BusinessLogic
 {
-    private readonly BookingRepository _bookingRepo = bookingRepo;
-    private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
-    private readonly PaymentRepository _paymentRepo = paymentRepo;
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-
-    public async Task<bool> ValidateMovieAsync(int movieId)
+    public class BookingLogic
+    (
+        BookingRepository bookingRepo,
+        BillingsummaryRepository summaryRepo,
+        PaymentRepository paymentRepo,
+        IHttpClientFactory httpClientFactory
+    )
     {
-        try
+        private readonly BookingRepository _repository = bookingRepo;
+        private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
+        private readonly PaymentRepository _paymentRepo = paymentRepo;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+
+        public async Task<bool> BookSeatAsync(BookingDto dto)
         {
-            var client = _httpClientFactory.CreateClient("MovieService");
-            var response = await client.GetAsync($"/api/movie/{movieId}");
-            return response.IsSuccessStatusCode;
-        }
-        catch { return false; }
-    }
+            var seatStatus = await _repository.GetShowseatstatusAsync(dto.Showinstanceid, dto.Seatid);
+            if (seatStatus == null || seatStatus.Isbooked)
+                return false;
 
-    public async Task<bool> ValidateTheaterAsync(int theaterId)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient("TheaterService");
-            var response = await client.GetAsync($"/api/theater/{theaterId}");
-            return response.IsSuccessStatusCode;
-        }
-        catch { return false; }
-    }
+            seatStatus.Isbooked = true;
 
-    public async Task<Booking?> CreateBookingAsync(BookingDto dto)
-    {
-        if (!await ValidateMovieAsync(dto.Movieid) || !await ValidateTheaterAsync(dto.Theaterid))
-            return null;
-
-        var booking = new Booking
-        {
-            Movieid = dto.Movieid,
-            Theaterid = dto.Theaterid,
-            Userid = dto.Userid,
-            Seatnumber = dto.Seatnumber,
-            Showtime = dto.Showtime,
-            Bookingtime = DateTime.UtcNow,
-            Status = "Confirmed"
-        };
-
-        return await _bookingRepo.AddBookingAsync(booking);
-    }
-
-    public async Task<Billingsummary> CreateSummaryAsync(BillingsummaryDto dto)
-    {
-        var summary = new Billingsummary
-        {
-            Bookingid = dto.Bookingid,
-            Baseamount = dto.Baseamount,
-            Discount = dto.Discount,
-            Gst = dto.Gst,
-            Servicefee = dto.Servicefee,
-            Totalamount = dto.Totalamount
-        };
-
-        return await _summaryRepo.AddSummaryAsync(summary);
-    }
-
-    public async Task<Payment?> MakePaymentAsync(PaymentDto dto)
-    {
-        var client = _httpClientFactory.CreateClient("PaymentService");
-        var response = await client.PostAsJsonAsync("/api/payment/pay", dto);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var savedPayment = new Payment
+            var showInstance = await _repository.GetShowinstanceByIdAsync(dto.Showinstanceid);
+            if (showInstance != null && showInstance.Availableseats > 0)
             {
-                Bookingid = dto.Bookingid,
-                Amountpaid = dto.Amountpaid,
-                Paymentmethod = dto.Paymentmethod,
-                Userid = dto.Userid,
-                Paymentdate = dto.Paymentdate
-            };
+                showInstance.Availableseats -= 1;
+            }
 
-            return await _paymentRepo.AddPaymentAsync(savedPayment);
+            await _repository.SaveChangesAsync();
+            return true;
         }
-
-        return null;
     }
 }
-

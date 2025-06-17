@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace DBModels.Models;
@@ -24,4 +23,3 @@ public partial class Movie
     public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
 
 }
-

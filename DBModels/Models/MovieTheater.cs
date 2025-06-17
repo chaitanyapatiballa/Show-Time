@@ -6,9 +6,9 @@ public class MovieTheater
     public int Movieid { get; set; }
     public int Theaterid { get; set; }
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public Movie? Movie { get; set; }
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public Theater? Theater { get; set; }
 }

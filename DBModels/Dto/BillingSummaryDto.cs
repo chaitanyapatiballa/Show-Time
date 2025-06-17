@@ -1,4 +1,4 @@
-﻿namespace BookingService.DTOs;
+﻿namespace PaymentService.DTOs;
 
 public class BillingsummaryDto
 {

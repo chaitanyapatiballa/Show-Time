@@ -2,6 +2,7 @@
 using DataAccessLayer.Repositories;
 using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
+using PaymentService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,9 +1,9 @@
 ﻿using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories;
+namespace PaymentService.Repositories;
 
-public class PaymentRepository(AppDbContext context)    
+public class PaymentRepository(AppDbContext context)
 {
     private readonly AppDbContext _context = context;
 

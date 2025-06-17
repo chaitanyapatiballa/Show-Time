@@ -1,38 +1,48 @@
-﻿
-using DataAccessLayer.Repositories;
-using DBModels.Dto;
+﻿using DBModels.Dto;
 using DBModels.Models;
+using PaymentService.DTOs;
+using PaymentService.Repositories;
 
-namespace BusinessLogic
+namespace PaymentService.Logic;
+
+public class PaymentLogic(
+    BillingsummaryRepository summaryRepo,
+    PaymentRepository paymentRepo)
 {
-    public class PaymentLogic
+    private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
+    private readonly PaymentRepository _paymentRepo = paymentRepo;
+
+    public async Task<Billingsummary> CreateSummaryAsync(BillingsummaryDto dto)
     {
-        private readonly PaymentRepository _repository;
-        private readonly AppDbContext _context;
-
-        public PaymentLogic(PaymentRepository repository, AppDbContext context)
+        var summary = new Billingsummary
         {
-            _repository = repository;
-            _context = context;
-        }
+            Bookingid = dto.Bookingid,
+            Baseamount = dto.Baseamount,
+            Discount = dto.Discount,
+            Gst = dto.Gst,
+            Servicefee = dto.Servicefee,
+            Totalamount = dto.Totalamount
+        };
 
-        public async Task<Payment> ProcessPaymentAsync(PaymentDto dto)
+        return await _summaryRepo.AddSummaryAsync(summary);
+    }
+
+    public async Task<Payment?> MakePaymentAsync(PaymentDto dto)
+    {
+        var payment = new Payment
         {
-            var payment = new Payment
-            {
-                Bookingid = dto.Bookingid,
-                Amountpaid = dto.Amountpaid,
-                Paymentmethod = dto.Paymentmethod,
-                Userid = dto.Userid,
-                Paymentdate = DateTime.UtcNow
-            };
+            Bookingid = dto.Bookingid,
+            Amountpaid = dto.Amountpaid,
+            Paymentmethod = dto.Paymentmethod,
+            Userid = dto.Userid,
+            Paymentdate = dto.Paymentdate
+        };
 
-            return await _repository.AddPaymentAsync(payment);
-        }
+        return await _paymentRepo.AddPaymentAsync(payment);
+    }
 
-        public async Task<List<Payment>> GetUserPaymentsAsync(int userId)
-        {
-            return await _repository.GetPaymentsByUserAsync(userId);
-        }
+    public async Task<List<Payment>> GetPaymentsByUserAsync(int userId)
+    {
+        return await _paymentRepo.GetPaymentsByUserAsync(userId);
     }
 }

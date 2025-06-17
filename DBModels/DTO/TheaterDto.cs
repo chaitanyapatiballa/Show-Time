@@ -1,5 +1,4 @@
-﻿
-using DBModels.Models;
+﻿using DBModels.Models;
 
 namespace DBModels.Dto;
 

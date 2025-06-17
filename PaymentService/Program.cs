@@ -2,6 +2,8 @@
 using DataAccessLayer.Repositories;
 using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
+using PaymentService.Logic;
+using PaymentService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Dependency Injection
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<PaymentLogic>();
+builder.Services.AddScoped<BillingsummaryRepository>();
 
 var app = builder.Build();
 

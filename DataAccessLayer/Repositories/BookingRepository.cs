@@ -1,21 +1,27 @@
-﻿using DBModels.Models;
+﻿// File: DataAccessLayer/Repositories/BookingRepository.cs
+using DBModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataAccessLayer.Repositories;
-    
-public class BookingRepository(AppDbContext context)
+namespace DataAccessLayer.Repositories
 {
-    private readonly AppDbContext _context = context;
-
-    public async Task<Booking> AddBookingAsync(Booking booking)
+    public class BookingRepository(AppDbContext context)
     {
-        _context.Bookings.Add(booking);
-        await _context.SaveChangesAsync();
-        return booking;
-    }
+        private readonly AppDbContext _context = context;
 
-    public async Task<List<Booking>> GetAllBookingsAsync()
-    {
-        return await _context.Bookings.ToListAsync();
+        public async Task<Showseatstatus?> GetShowseatstatusAsync(int showinstanceId, int seatId)
+        {
+            return await _context.Showseatstatuses
+                .FirstOrDefaultAsync(s => s.Showinstanceid == showinstanceId && s.Seatid == seatId);
+        }
+
+        public async Task<Showinstance?> GetShowinstanceByIdAsync(int id)
+        {
+            return await _context.Showinstances.FindAsync(id);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

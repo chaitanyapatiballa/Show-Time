@@ -1,33 +1,42 @@
-﻿using BookingService.DTOs;
-using BusinessLogic;
-using DBModels.Dto;
+﻿using DBModels.Dto;
 using Microsoft.AspNetCore.Mvc;
+using PaymentService.DTOs;
+using PaymentService.Logic;
 
-namespace PaymentService.Controllers
+namespace Payment_Service.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class PaymentController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PaymentController : ControllerBase
+    private readonly PaymentLogic _logic;
+
+    public PaymentController(PaymentLogic logic)
     {
-        private readonly PaymentLogic _service;
+        _logic = logic;
+    }
 
-        public PaymentController(PaymentLogic service)
-        {
-            _service = service;
-        }
+    [HttpPost("billing-summary")]
+    public async Task<IActionResult> AddSummary(BillingsummaryDto dto)
+    {
+        var result = await _logic.CreateSummaryAsync(dto);
+        return Ok(result);
+    }
 
-        [HttpPost("pay")]
-        public async Task<IActionResult> Pay([FromBody] PaymentDto dto)
-        {
-            var result = await _service.ProcessPaymentAsync(dto);
-            return Ok(result);
-        }
+    [HttpPost("make-payment")]
+    public async Task<IActionResult> MakePayment(PaymentDto dto)
+    {
+        var result = await _logic.MakePaymentAsync(dto);
+        if (result == null)
+            return BadRequest("Payment failed.");
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserPayments(int userId)
-        {
-            var payments = await _service.GetUserPaymentsAsync(userId);
-            return Ok(payments);
-        }
+        return Ok(result);
+    }
+
+    [HttpGet("user/{userId}/payments")]
+    public async Task<IActionResult> GetUserPayments(int userId)
+    {
+        var payments = await _logic.GetPaymentsByUserAsync(userId);
+        return Ok(payments);
     }
 }

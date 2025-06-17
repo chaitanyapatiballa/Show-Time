@@ -1,4 +1,6 @@
-﻿namespace DBModels.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace DBModels.Models;
 
 public partial class Showinstance
 {
@@ -14,5 +16,7 @@ public partial class Showinstance
 
     public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
 
+    [JsonIgnore]
     public virtual Showtemplate? Showtemplate { get; set; }
+
 }
