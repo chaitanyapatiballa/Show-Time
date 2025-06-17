@@ -15,5 +15,7 @@ public partial class Showinstance
 
     public int? Availableseats { get; set; }
 
+    public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
+
     public virtual Showtemplate? Showtemplate { get; set; }
 }

@@ -66,14 +66,14 @@ public class MovieLogic
         };
 
         bool exists = await _context.MovieTheaters.AnyAsync(mt =>
-            mt.Movieid == dto.Movieid && mt.Theaterid == dto.Theaterid);
+            mt.movieid == dto.Movieid && mt.theaterid == dto.Theaterid);
 
         if (!exists)
         {
             _context.MovieTheaters.Add(new MovieTheater
             {
-                Movieid = dto.Movieid,
-                Theaterid = dto.Theaterid
+                movieid = dto.Movieid,
+                theaterid = dto.Theaterid
             });
         }
 

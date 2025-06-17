@@ -15,8 +15,11 @@ public partial class Theater
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
+    public virtual ICollection<Seat> Seats { get; set; } = new List<Seat>();
+
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
+    public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
     public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
 
 }

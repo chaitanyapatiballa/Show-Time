@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace DBModels.Models;
@@ -22,14 +23,17 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Payment> Payments { get; set; }
 
+    public virtual DbSet<Seat> Seats { get; set; }
+
     public virtual DbSet<Showinstance> Showinstances { get; set; }
+
+    public virtual DbSet<Showseatstatus> Showseatstatuses { get; set; }
 
     public virtual DbSet<Showtemplate> Showtemplates { get; set; }
 
     public virtual DbSet<Theater> Theaters { get; set; }
+
     public DbSet<MovieTheater> MovieTheaters { get; set; }
-
-
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
@@ -118,6 +122,23 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");
+
+            entity.HasMany(d => d.Theaters).WithMany(p => p.Movies)
+                .UsingEntity<Dictionary<string, object>>(
+                    "Movietheater",
+                    r => r.HasOne<Theater>().WithMany()
+                        .HasForeignKey("Theaterid")
+                        .HasConstraintName("movietheaters_theaterid_fkey"),
+                    l => l.HasOne<Movie>().WithMany()
+                        .HasForeignKey("Movieid")
+                        .HasConstraintName("movietheaters_movieid_fkey"),
+                    j =>
+                    {
+                        j.HasKey("Movieid", "Theaterid").HasName("movietheaters_pkey");
+                        j.ToTable("movietheaters");
+                        j.IndexerProperty<int>("Movieid").HasColumnName("movieid");
+                        j.IndexerProperty<int>("Theaterid").HasColumnName("theaterid");
+                    });
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -147,27 +168,62 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("payments_bookingid_fkey");
         });
 
+        modelBuilder.Entity<Seat>(entity =>
+        {
+            entity.HasKey(e => e.Seatid).HasName("seats_pkey");
+
+            entity.ToTable("seats");
+
+            entity.Property(e => e.Seatid).HasColumnName("seatid");
+            entity.Property(e => e.Number).HasColumnName("number");
+            entity.Property(e => e.Row)
+                .HasMaxLength(5)
+                .HasColumnName("row");
+            entity.Property(e => e.Theaterid).HasColumnName("theaterid");
+
+            entity.HasOne(d => d.Theater).WithMany(p => p.Seats)
+                .HasForeignKey(d => d.Theaterid)
+                .HasConstraintName("seats_theaterid_fkey");
+        });
+
         modelBuilder.Entity<Showinstance>(entity =>
         {
             entity.HasKey(e => e.Showinstanceid).HasName("showinstances_pkey");
 
             entity.ToTable("showinstances");
 
-            entity.Property(e => e.Showinstanceid)
-                .HasColumnName("showinstanceid")
-                .ValueGeneratedOnAdd();
-
+            entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
             entity.Property(e => e.Availableseats).HasColumnName("availableseats");
             entity.Property(e => e.Showdate).HasColumnName("showdate");
             entity.Property(e => e.Showtemplateid).HasColumnName("showtemplateid");
             entity.Property(e => e.Showtime).HasColumnName("showtime");
 
-            entity.HasOne(d => d.Showtemplate)
-                .WithMany(p => p.Showinstances)
+            entity.HasOne(d => d.Showtemplate).WithMany(p => p.Showinstances)
                 .HasForeignKey(d => d.Showtemplateid)
                 .HasConstraintName("showinstances_showtemplateid_fkey");
         });
 
+        modelBuilder.Entity<Showseatstatus>(entity =>
+        {
+            entity.HasKey(e => e.Showseatstatusid).HasName("showseatstatuses_pkey");
+
+            entity.ToTable("showseatstatuses");
+
+            entity.Property(e => e.Showseatstatusid).HasColumnName("showseatstatusid");
+            entity.Property(e => e.Isbooked)
+                .HasDefaultValue(false)
+                .HasColumnName("isbooked");
+            entity.Property(e => e.Seatid).HasColumnName("seatid");
+            entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
+
+            entity.HasOne(d => d.Seat).WithMany(p => p.Showseatstatuses)
+                .HasForeignKey(d => d.Seatid)
+                .HasConstraintName("showseatstatuses_seatid_fkey");
+
+            entity.HasOne(d => d.Showinstance).WithMany(p => p.Showseatstatuses)
+                .HasForeignKey(d => d.Showinstanceid)
+                .HasConstraintName("showseatstatuses_showinstanceid_fkey");
+        });
 
         modelBuilder.Entity<Showtemplate>(entity =>
         {
@@ -201,19 +257,20 @@ public partial class AppDbContext : DbContext
         {
             entity.ToTable("movietheaters");
 
-            entity.HasKey(mt => new { mt.Movieid, mt.Theaterid });
+            entity.HasKey(mt => new { mt.movieid, mt.theaterid });
 
-            entity.Property(mt => mt.Movieid).HasColumnName("movieid");
-            entity.Property(mt => mt.Theaterid).HasColumnName("theaterid");
+            entity.Property(mt => mt.movieid).HasColumnName("movieid");
+            entity.Property(mt => mt.theaterid).HasColumnName("theaterid");
 
             entity.HasOne(mt => mt.Movie)
                 .WithMany(m => m.MovieTheaters)
-                .HasForeignKey(mt => mt.Movieid);
+                .HasForeignKey(mt => mt.movieid);
 
             entity.HasOne(mt => mt.Theater)
                 .WithMany(t => t.MovieTheaters)
-                .HasForeignKey(mt => mt.Theaterid);
+                .HasForeignKey(mt => mt.theaterid);
         });
+
 
 
         modelBuilder.Entity<Theater>(entity =>

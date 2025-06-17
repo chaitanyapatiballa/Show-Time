@@ -8,4 +8,6 @@ public class TheaterDto
     public string Name { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
     public List<int>? MovieIds { get; set; }
+    public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+
 }
