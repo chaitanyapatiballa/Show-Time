@@ -1,4 +1,6 @@
-﻿namespace DBModels.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace DBModels.Models;
 
 public partial class Theater
 {
@@ -16,7 +18,8 @@ public partial class Theater
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
+    [JsonIgnore]
     public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+
 
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace DBModels.Models;
 
@@ -19,8 +20,8 @@ public partial class Movie
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
-
+    [JsonIgnore]
     public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
 
 }
+
