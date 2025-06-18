@@ -1,5 +1,7 @@
 ﻿using BusinessLogic;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
 
 namespace Booking_Service.Controllers;
 
@@ -17,7 +19,15 @@ public class BookingController : ControllerBase
     [HttpPost("bookseat")]
     public async Task<IActionResult> BookSeat([FromBody] BookingDto dto)
     {
-        var success = await _logic.BookSeatAsync(dto);
+        //  UserId from JWT claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized("User ID not found in token");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        // Call logic with UserId
+        var success = await _logic.BookSeatAsync(dto, userId);
         if (!success)
             return BadRequest("Seat already booked or not found");
 
