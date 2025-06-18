@@ -1,5 +1,4 @@
 ﻿using AuthService.Repositories;
-using DataAccessLayer.Repositories;
 using DBModels.Dto;
 using DBModels.Models;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+
 
 namespace BusinessLogic;
 
@@ -21,12 +21,13 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
         if (await _userRepo.GetByEmailAsync(dto.Email) != null)
             return false;
 
-        using var hmac = new HMACSHA256();
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
         var user = new User
         {
             Username = dto.Username,
             Email = dto.Email,
-            PasswordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password))),
+            PasswordHash = hashedPassword,
             Role = dto.Role ?? "User"
         };
 
@@ -34,21 +35,21 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
         return true;
     }
 
+
+
     public async Task<string?> LoginAsync(LoginDto dto)
     {
         var user = await _userRepo.GetByEmailAsync(dto.Email);
         if (user == null)
             return null;
 
-        using var hmac = new HMACSHA256();
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dto.Password));
-        var storedHash = Convert.FromBase64String(user.PasswordHash);
-
-        if (!storedHash.SequenceEqual(computedHash))
+        bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+        if (!isValid)
             return null;
 
         return GenerateJwtToken(user);
     }
+
 
     private string GenerateJwtToken(User user)
     {

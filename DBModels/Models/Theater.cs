@@ -19,8 +19,7 @@ public partial class Theater
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
     [JsonIgnore]
-    public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+    public ICollection<Movietheater> MovieTheaters { get; set; } = new List<Movietheater>();
 
 
 }
-

@@ -15,7 +15,7 @@ namespace DBModels.Dto
         public string Genre { get; set; } = string.Empty;
         public DateTime? releasedate { get; set; }
 
-        public ICollection<MovieTheater> MovieTheaters { get; set; } = new List<MovieTheater>();
+        public ICollection<Movietheater> MovieTheaters { get; set; } = new List<Movietheater>();
 
     }
 }

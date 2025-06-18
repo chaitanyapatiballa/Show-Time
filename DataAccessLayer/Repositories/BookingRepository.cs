@@ -25,7 +25,7 @@ namespace DataAccessLayer.Repositories
                 Showinstanceid = showinstanceid,
                 Seatid = seatid,
                 Userid = userid,
-                BookedAt = DateTime.UtcNow
+                Bookingtime = DateTime.UtcNow
             };
             _context.Bookings.Add(booking);
             return Task.CompletedTask;

@@ -33,12 +33,11 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Theater> Theaters { get; set; }
 
-    public DbSet<MovieTheater> MovieTheaters { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public virtual DbSet<Movietheater> Movietheaters { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=showtime_db;Username=postgres;Password=Admin");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,13 +79,13 @@ public partial class AppDbContext : DbContext
             entity.ToTable("bookings");
 
             entity.Property(e => e.Bookingid).HasColumnName("bookingid");
-            entity.Property(e => e.Bookingtime)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("bookingtime");
+            entity.Property(e => e.Bookingtime).HasColumnName("bookingtime");
             entity.Property(e => e.Movieid).HasColumnName("movieid");
+            entity.Property(e => e.Seatid).HasColumnName("seatid");
             entity.Property(e => e.Seatnumber)
                 .HasMaxLength(10)
                 .HasColumnName("seatnumber");
+            entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
             entity.Property(e => e.Showtime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("showtime");
@@ -124,6 +123,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(100)
                 .HasColumnName("title");
+
+           
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -255,27 +256,6 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("name");
         });
-
-        modelBuilder.Entity<MovieTheater>(entity =>
-        {
-            entity.ToTable("movietheaters");
-
-            entity.HasKey(mt => new { mt.Movieid, mt.Theaterid }).HasName("movietheaters_pkey");
-
-            entity.Property(mt => mt.Movieid).HasColumnName("movieid");
-            entity.Property(mt => mt.Theaterid).HasColumnName("theaterid");
-
-            entity.HasOne(mt => mt.Movie)
-                .WithMany(m => m.MovieTheaters)
-                .HasForeignKey(mt => mt.Movieid)
-                .HasConstraintName("movietheaters_movieid_fkey");
-
-            entity.HasOne(mt => mt.Theater)
-                .WithMany(t => t.MovieTheaters)
-                .HasForeignKey(mt => mt.Theaterid)
-                .HasConstraintName("movietheaters_theaterid_fkey");
-        });
-
 
         modelBuilder.Entity<User>(entity =>
         {

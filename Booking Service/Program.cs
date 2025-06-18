@@ -12,7 +12,36 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Controllers and Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "BookingService", Version = "v1" });
+
+    // Add JWT Auth support
+    c.AddSecurityDefinition("JWT", new()
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "JWT",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter JWT token (no Bearer prefix required)"
+    });
+
+    c.AddSecurityRequirement(new()
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "JWT"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Configure PostgreSQL DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -36,6 +65,10 @@ builder.Services.AddHttpClient("TheaterService", client =>
 builder.Services.AddHttpClient("PaymentService", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7107");
+});
+builder.Services.AddHttpClient("AuthService", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7255");
 });
 
 //  JWT Authentication

@@ -40,7 +40,7 @@ public class TheaterLogic
                 .Where(m => movieIds.Contains(m.Movieid))
                 .ToListAsync();
 
-            theater.MovieTheaters = movies.Select(m => new MovieTheater
+            theater.MovieTheaters = movies.Select(m => new Movietheater
             {
                 Movieid = m.Movieid,
                 Theater = theater
@@ -48,13 +48,97 @@ public class TheaterLogic
         }
 
         await _repository.AddAsync(theater);
+
+        int rows = 2;  // A to B
+        int seatsPerRow = 10;
+
+        var seats = new List<Seat>();
+        for (char row = 'A'; row < 'A' + rows; row++)
+        {
+            for (int num = 1; num <= seatsPerRow; num++)
+            {
+                seats.Add(new Seat
+                {
+                    Theaterid = theater.Theaterid,
+                    Row = row.ToString(),
+                    Number = num
+                });
+            }
+        }
+
+        _context.Seats.AddRange(seats);
+        await _context.SaveChangesAsync();
     }
+    public async Task AddSeatsForExistingTheatersAsync()
+    {
+        var theatersWithoutSeats = await _context.Theaters
+            .Where(t => !_context.Seats.Any(s => s.Theaterid == t.Theaterid))
+            .ToListAsync();
+
+        var seatsToAdd = new List<Seat>();
+
+        foreach (var theater in theatersWithoutSeats)
+        {
+            int rows = 2; // A to B
+            int seatsPerRow = 10;
+
+            for (char row = 'A'; row < 'A' + rows; row++)
+            {
+                for (int num = 1; num <= seatsPerRow; num++)
+                {
+                    seatsToAdd.Add(new Seat
+                    {
+                        Theaterid = theater.Theaterid,
+                        Row = row.ToString(),
+                        Number = num
+                    });
+                }
+            }
+        }
+
+        _context.Seats.AddRange(seatsToAdd);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AddMissingShowseatStatusesAsync()
+    {
+        var showinstances = await _context.Showinstances
+            .Include(si => si.Showtemplate)
+            .ThenInclude(st => st.Theater)
+            .ToListAsync();
+
+        foreach (var instance in showinstances)
+        {
+            var seatStatuses = await _context.Showseatstatuses
+                .Where(s => s.Showinstanceid == instance.Showinstanceid)
+                .ToListAsync();
+
+            if (seatStatuses.Any()) continue; // Already created
+
+            var seats = await _context.Seats
+                .Where(s => s.Theaterid == instance.Showtemplate.Theaterid)
+                .ToListAsync();
+
+            var newStatuses = seats.Select(seat => new Showseatstatus
+            {
+                Seatid = seat.Seatid,
+                Showinstanceid = instance.Showinstanceid,
+                Isbooked = false
+            });
+
+            _context.Showseatstatuses.AddRange(newStatuses);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+
 
     public async Task UpdateAsync(Theater theater, List<int>? movieIds)
     {
         // Remove existing MovieTheater links
-        var existingLinks = _context.MovieTheaters.Where(mt => mt.Theaterid == theater.Theaterid);
-        _context.MovieTheaters.RemoveRange(existingLinks);
+        var existingLinks = _context.Movietheaters.Where(mt => mt.Theaterid == theater.Theaterid);
+        _context.Movietheaters.RemoveRange(existingLinks);
 
         if (movieIds != null && movieIds.Any())
         {
@@ -62,7 +146,7 @@ public class TheaterLogic
                 .Where(m => movieIds.Contains(m.Movieid))
                 .ToListAsync();
 
-            theater.MovieTheaters = movies.Select(m => new MovieTheater
+            theater.MovieTheaters = movies.Select(m => new Movietheater
             {
                 Movieid = m.Movieid,
                 Theaterid = theater.Theaterid
@@ -95,12 +179,12 @@ public class TheaterLogic
             Baseprice = dto.Baseprice
         };
 
-        bool linkExists = await _context.MovieTheaters.AnyAsync(mt =>
+        bool linkExists = await _context.Movietheaters.AnyAsync(mt =>
             mt.Movieid == template.Movieid && mt.Theaterid == template.Theaterid);
 
         if (!linkExists)
         {
-            _context.MovieTheaters.Add(new MovieTheater
+            _context.Movietheaters.Add(new Movietheater
             {
                 Movieid = template.Movieid.Value,
                 Theaterid = template.Theaterid.Value
