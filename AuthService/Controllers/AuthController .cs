@@ -18,10 +18,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
-        var result = await _logic.RegisterAsync(dto);
-        if (!result)
+        var success = await _logic.RegisterAsync(dto);
+        if (!success)
             return BadRequest("User already exists or registration failed.");
-
         return Ok("Registration successful");
     }
 

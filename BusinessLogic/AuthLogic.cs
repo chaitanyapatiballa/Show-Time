@@ -5,9 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
-
 
 namespace BusinessLogic;
 
@@ -35,21 +33,14 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
         return true;
     }
 
-
-
     public async Task<string?> LoginAsync(LoginDto dto)
     {
         var user = await _userRepo.GetByEmailAsync(dto.Email);
-        if (user == null)
-            return null;
-
-        bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Passwordhash);
-        if (!isValid)
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Passwordhash))
             return null;
 
         return GenerateJwtToken(user);
     }
-
 
     private string GenerateJwtToken(User user)
     {
