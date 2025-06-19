@@ -1,5 +1,6 @@
 ﻿using Booking_Service.Controllers;
 using DataAccessLayer.Repositories;
+using DBModels.Dto;
 using PaymentService.Repositories;
 
 
@@ -19,42 +20,57 @@ namespace BusinessLogic
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
 
-        public async Task<bool> BookSeatAsync(BookingDto dto, int userId)
+        public async Task<(bool Success, decimal Amount, string? ErrorMessage)> BookSeatAsync(BookingDto dto, int userId)
         {
             var seatStatus = await _repository.GetShowseatstatusAsync(dto.Showinstanceid, dto.Seatid);
             if (seatStatus == null || seatStatus.Isbooked)
-                return false;
+                return (false, 0, "Seat already booked or not found");
 
-            // Mark seat as booked
             seatStatus.Isbooked = true;
-
-            // Reduce available seats
             var showinstance = await _repository.GetShowinstanceByIdAsync(dto.Showinstanceid);
             if (showinstance == null || showinstance.Availableseats <= 0)
-                return false;
+                return (false, 0, "No seats available");
 
             showinstance.Availableseats -= 1;
 
-            // Combine Showdate (DateOnly?) + Showtime (TimeOnly?) → DateTime
             if (!showinstance.Showdate.HasValue || !showinstance.Showtime.HasValue)
-                return false;
-
-            var showdate = showinstance.Showdate.Value; //nullable DateOnly
-            var showtime = showinstance.Showtime.Value; //nullable TimeOnly
+                return (false, 0, "Invalid showtime");
 
             var combinedShowtime = new DateTime(
-                showdate.Year,
-                showdate.Month,
-                showdate.Day,
-                showtime.Hour,
-                showtime.Minute,
-                showtime.Second
+                showinstance.Showdate.Value.Year,
+                showinstance.Showdate.Value.Month,
+                showinstance.Showdate.Value.Day,
+                showinstance.Showtime.Value.Hour,
+                showinstance.Showtime.Value.Minute,
+                showinstance.Showtime.Value.Second
             );
 
-            await _repository.SaveBookingAsync(dto.Showinstanceid, dto.Seatid, userId, combinedShowtime);
+            decimal seatPrice = await _repository.GetSeatPriceAsync(dto.Seatid);
+
+            await _repository.SaveBookingAsync(dto.Showinstanceid, dto.Seatid, userId, combinedShowtime, seatPrice);
             await _repository.SaveChangesAsync();
 
-            return true;
+            return (true, seatPrice, null);
+        }
+
+        public async Task<bool> CancelBookingAsync(int bookingId)
+        {
+            return await _repository.CancelBookingAsync(bookingId);
+        }
+
+        public async Task<List<ShowinstanceDto>> GetShowsAsync(int movieId, int theaterId, DateOnly date)
+        {
+            return await _repository.GetShowsByMovieTheaterAndDateAsync(movieId, theaterId, date);
+        }
+
+        public async Task<List<SeatStatusDto>> GetAvailableSeatsAsync(int showinstanceId)
+        {
+            return await _repository.GetAvailableSeatsForShowinstanceAsync(showinstanceId);
+        }
+
+        public async Task GenerateNextDayShowinstancesAsync()
+        {
+            await _repository.DuplicateTodayShowinstancesForTomorrow();
         }
     }
 }

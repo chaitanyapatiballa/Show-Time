@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace DBModels.Models;
@@ -11,7 +12,7 @@ public partial class Movie
 
     public string? Duration { get; set; }
 
-    public DateTime? releasedate { get; set; }
+    public DateOnly? Releasedate { get; set; }
 
     public string? Genre { get; set; }
 
@@ -19,7 +20,7 @@ public partial class Movie
 
     public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
+    public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
     [JsonIgnore]
-    public ICollection<Movietheater> MovieTheaters { get; set; } = new List<Movietheater>();
-
+    public ICollection<Movietheater> Movietheater { get; set; } = new List<Movietheater>();
 }

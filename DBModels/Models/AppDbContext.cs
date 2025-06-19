@@ -33,9 +33,9 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Theater> Theaters { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public DbSet<Movietheater> Movietheater { get; set; }   
 
-    public virtual DbSet<Movietheater> Movietheaters { get; set; }
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=showtime_db;Username=postgres;Password=Admin");
@@ -68,7 +68,6 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.Booking).WithMany(p => p.Billingsummaries)
                 .HasForeignKey(d => d.Bookingid)
-                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("billingsummaries_bookingid_fkey");
         });
 
@@ -79,11 +78,28 @@ public partial class AppDbContext : DbContext
             entity.ToTable("bookings");
 
             entity.Property(e => e.Bookingid).HasColumnName("bookingid");
-            entity.Property(e => e.Bookingtime).HasColumnName("bookingtime");
+            entity.Property(e => e.Baseprice)
+                .HasPrecision(10, 2)
+                .HasColumnName("baseprice");
+            entity.Property(e => e.Bookingtime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("bookingtime");
+            entity.Property(e => e.Cancelledat)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("cancelledat");
+            entity.Property(e => e.Emailsent)
+                .HasDefaultValue(false)
+                .HasColumnName("emailsent");
+            entity.Property(e => e.Isrefunded)
+                .HasDefaultValue(false)
+                .HasColumnName("isrefunded");
             entity.Property(e => e.Movieid).HasColumnName("movieid");
+            entity.Property(e => e.Refundamount)
+                .HasPrecision(10, 2)
+                .HasColumnName("refundamount");
             entity.Property(e => e.Seatid).HasColumnName("seatid");
             entity.Property(e => e.Seatnumber)
-                .HasMaxLength(10)
+                .HasMaxLength(50)
                 .HasColumnName("seatnumber");
             entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
             entity.Property(e => e.Showtime)
@@ -97,13 +113,24 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.Movie).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.Movieid)
-                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("bookings_movieid_fkey");
+
+            entity.HasOne(d => d.Seat).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.Seatid)
+                .HasConstraintName("bookings_seatid_fkey");
+
+            entity.HasOne(d => d.Showinstance).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.Showinstanceid)
+                .HasConstraintName("bookings_showinstanceid_fkey");
 
             entity.HasOne(d => d.Theater).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.Theaterid)
-                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("bookings_theaterid_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Bookings)
+                .HasForeignKey(d => d.Userid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("bookings_userid_fkey");
         });
 
         modelBuilder.Entity<Movie>(entity =>
@@ -119,12 +146,29 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Genre)
                 .HasMaxLength(100)
                 .HasColumnName("genre");
-            entity.Property(e => e.releasedate).HasColumnName("releasedate");
+            entity.Property(e => e.Releasedate).HasColumnName("releasedate");
             entity.Property(e => e.Title)
-                .HasMaxLength(100)
+                .HasMaxLength(200)
                 .HasColumnName("title");
 
-           
+            entity.HasMany(d => d.Theaters).WithMany(p => p.Movies)
+                .UsingEntity<Dictionary<string, object>>(
+                    "Movietheater",
+                    r => r.HasOne<Theater>().WithMany()
+                        .HasForeignKey("Theaterid")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("movietheaters_theaterid_fkey"),
+                    l => l.HasOne<Movie>().WithMany()
+                        .HasForeignKey("Movieid")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("movietheaters_movieid_fkey"),
+                    j =>
+                    {
+                        j.HasKey("Movieid", "Theaterid").HasName("movietheaters_pkey");
+                        j.ToTable("movietheaters");
+                        j.IndexerProperty<int>("Movieid").HasColumnName("movieid");
+                        j.IndexerProperty<int>("Theaterid").HasColumnName("theaterid");
+                    });
         });
 
         modelBuilder.Entity<Payment>(entity =>
@@ -132,8 +176,6 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Paymentid).HasName("payments_pkey");
 
             entity.ToTable("payments");
-
-            entity.HasIndex(e => e.Bookingid, "payments_bookingid_key").IsUnique();
 
             entity.Property(e => e.Paymentid).HasColumnName("paymentid");
             entity.Property(e => e.Amountpaid)
@@ -146,12 +188,23 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Paymentmethod)
                 .HasMaxLength(50)
                 .HasColumnName("paymentmethod");
+            entity.Property(e => e.Refunddate)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("refunddate");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValueSql("'Success'::character varying")
+                .HasColumnName("status");
             entity.Property(e => e.Userid).HasColumnName("userid");
 
-            entity.HasOne(d => d.Booking).WithOne(p => p.Payment)
-                .HasForeignKey<Payment>(d => d.Bookingid)
-                .OnDelete(DeleteBehavior.Cascade)
+            entity.HasOne(d => d.Booking).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.Bookingid)
                 .HasConstraintName("payments_bookingid_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.Userid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("payments_userid_fkey");
         });
 
         modelBuilder.Entity<Seat>(entity =>
@@ -161,14 +214,18 @@ public partial class AppDbContext : DbContext
             entity.ToTable("seats");
 
             entity.Property(e => e.Seatid).HasColumnName("seatid");
+            entity.Property(e => e.Baseprice)
+                .HasPrecision(10, 2)
+                .HasColumnName("baseprice");
             entity.Property(e => e.Number).HasColumnName("number");
             entity.Property(e => e.Row)
-                .HasMaxLength(5)
+                .HasMaxLength(10)
                 .HasColumnName("row");
             entity.Property(e => e.Theaterid).HasColumnName("theaterid");
 
             entity.HasOne(d => d.Theater).WithMany(p => p.Seats)
                 .HasForeignKey(d => d.Theaterid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("seats_theaterid_fkey");
         });
 
@@ -196,18 +253,18 @@ public partial class AppDbContext : DbContext
             entity.ToTable("showseatstatuses");
 
             entity.Property(e => e.Showseatstatusid).HasColumnName("showseatstatusid");
-            entity.Property(e => e.Isbooked)
-                .HasDefaultValue(false)
-                .HasColumnName("isbooked");
+            entity.Property(e => e.Isbooked).HasColumnName("isbooked");
             entity.Property(e => e.Seatid).HasColumnName("seatid");
             entity.Property(e => e.Showinstanceid).HasColumnName("showinstanceid");
 
             entity.HasOne(d => d.Seat).WithMany(p => p.Showseatstatuses)
                 .HasForeignKey(d => d.Seatid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("showseatstatuses_seatid_fkey");
 
             entity.HasOne(d => d.Showinstance).WithMany(p => p.Showseatstatuses)
                 .HasForeignKey(d => d.Showinstanceid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("showseatstatuses_showinstanceid_fkey");
         });
 
@@ -246,26 +303,33 @@ public partial class AppDbContext : DbContext
             entity.ToTable("theaters");
 
             entity.Property(e => e.Theaterid).HasColumnName("theaterid");
-            entity.Property(e => e.Capacity)
-                .HasDefaultValue(100)
-                .HasColumnName("capacity");
+            entity.Property(e => e.Capacity).HasColumnName("capacity");
             entity.Property(e => e.Location)
-                .HasMaxLength(100)
+                .HasMaxLength(150)
                 .HasColumnName("location");
             entity.Property(e => e.Name)
-                .HasMaxLength(100)
+                .HasMaxLength(150)
                 .HasColumnName("name");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Userid).HasName("Users_pkey");
+            entity.HasKey(e => e.Userid).HasName("users_pkey");
 
-            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.ToTable("users");
+
+            entity.Property(e => e.Userid).HasColumnName("userid");
+            entity.Property(e => e.Email)
+                .HasMaxLength(150)
+                .HasColumnName("email");
+            entity.Property(e => e.Passwordhash).HasColumnName("passwordhash");
+            entity.Property(e => e.Passwordsalt).HasColumnName("passwordsalt");
             entity.Property(e => e.Role)
                 .HasMaxLength(50)
-                .HasDefaultValueSql("'User'::character varying");
-            entity.Property(e => e.Username).HasMaxLength(100);
+                .HasColumnName("role");
+            entity.Property(e => e.Username)
+                .HasMaxLength(100)
+                .HasColumnName("username");
         });
 
         OnModelCreatingPartial(modelBuilder);

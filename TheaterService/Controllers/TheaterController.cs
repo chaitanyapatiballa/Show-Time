@@ -17,62 +17,31 @@ namespace TheaterService.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Theater>>> GetAllTheaters()
-        {
-            var theaters = await _logic.GetAllAsync();
-            return Ok(theaters);
-        }
+        public async Task<ActionResult<List<Theater>>> GetAllTheaters() => Ok(await _logic.GetAllAsync());
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Theater>> GetTheaterById(int id)
         {
             var theater = await _logic.GetByIdAsync(id);
-            if (theater == null)
-                return NotFound();
-
-            return Ok(theater);
+            return theater == null ? NotFound() : Ok(theater);
         }
 
         [HttpPost("Add-Theater")]
         public async Task<ActionResult> CreateTheater([FromBody] TheaterDto dto)
         {
-            var theater = new Theater
-            {
-                Name = dto.Name,
-                Location = dto.Location,
-                Capacity = dto.Capacity
-            };
-
+            var theater = new Theater { Name = dto.Name, Location = dto.Location, Capacity = dto.Capacity };
             await _logic.AddAsync(theater, dto.MovieIds);
-
             return CreatedAtAction(nameof(GetTheaterById), new { id = theater.Theaterid }, theater);
         }
-
-        //[HttpPost("seed-seats")]
-        //public async Task<IActionResult> SeedSeats()
-        //{
-        //    await _logic.AddSeatsForExistingTheatersAsync();
-        //    return Ok("Seats added for existing theaters.");
-        //}
-        //[HttpPost("fix-showseatstatus")]
-        //public async Task<IActionResult> FixShowSeatStatuses()
-        //{
-        //    await _logic.AddMissingShowseatStatusesAsync();
-        //    return Ok("✅ Showseatstatuses fixed for all showinstances.");
-        //}
-
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateTheater(int id, [FromBody] TheaterDto dto)
         {
             var existing = await _logic.GetByIdAsync(id);
-            if (existing == null)
-                return NotFound();
-
+            if (existing == null) return NotFound();
             existing.Name = dto.Name;
             existing.Location = dto.Location;
             existing.Capacity = dto.Capacity;
-
             await _logic.UpdateAsync(existing, dto.MovieIds);
             return NoContent();
         }
@@ -81,23 +50,19 @@ namespace TheaterService.Controllers
         public async Task<ActionResult> DeleteTheater(int id)
         {
             var existing = await _logic.GetByIdAsync(id);
-            if (existing == null)
-                return NotFound();
-
+            if (existing == null) return NotFound();
             await _logic.DeleteAsync(existing);
             return NoContent();
         }
 
         [HttpGet("showtemplates")]
-        public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates()
-            => await _logic.GetAllShowtemplatesAsync();
+        public async Task<ActionResult<List<Showtemplate>>> GetAllShowtemplates() => Ok(await _logic.GetAllShowtemplatesAsync());
 
         [HttpGet("showtemplates/{id}")]
         public async Task<ActionResult<Showtemplate>> GetShowtemplateById(int id)
         {
             var template = await _logic.GetShowtemplateByIdAsync(id);
-            if (template == null) return NotFound();
-            return template;
+            return template == null ? NotFound() : Ok(template);
         }
 
         [HttpPost("showtemplates")]
@@ -112,7 +77,6 @@ namespace TheaterService.Controllers
         {
             var existing = await _logic.GetShowtemplateByIdAsync(id);
             if (existing == null) return NotFound();
-
             await _logic.UpdateShowtemplateAsync(id, dto);
             return NoContent();
         }
@@ -127,15 +91,13 @@ namespace TheaterService.Controllers
         }
 
         [HttpGet("showinstances")]
-        public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() =>
-            await _logic.GetAllShowinstancesAsync();
+        public async Task<ActionResult<List<Showinstance>>> GetAllShowinstances() => Ok(await _logic.GetAllShowinstancesAsync());
 
         [HttpGet("showinstances/{id}")]
         public async Task<ActionResult<Showinstance>> GetShowinstanceById(int id)
         {
             var instance = await _logic.GetShowinstanceByIdAsync(id);
-            if (instance == null) return NotFound();
-            return instance;
+            return instance == null ? NotFound() : Ok(instance);
         }
 
         [HttpPost("showinstances")]
@@ -156,16 +118,28 @@ namespace TheaterService.Controllers
         public async Task<ActionResult> UpdateShowinstance(int id, [FromBody] ShowinstanceDto dto)
         {
             var updated = await _logic.UpdateShowinstanceAsync(id, dto);
-            if (!updated) return NotFound();
-            return NoContent();
+            return !updated ? NotFound() : NoContent();
         }
 
         [HttpDelete("showinstances/{id}")]
         public async Task<ActionResult> DeleteShowinstance(int id)
         {
             var deleted = await _logic.DeleteShowinstanceAsync(id);
-            if (!deleted) return NotFound();
-            return NoContent();
+            return !deleted ? NotFound() : NoContent();
+        }
+
+        [HttpGet("showinstances/by-movie/{movieId}")]
+        public async Task<ActionResult<List<Showinstance>>> GetShowinstancesByMovie(int movieId)
+        {
+            var result = await _logic.GetShowinstancesByMovieAsync(movieId);
+            return Ok(result);
+        }
+
+        [HttpGet("showinstances/{showInstanceId}/seats")]
+        public async Task<ActionResult<List<Showseatstatus>>> GetSeatStatusesByShowinstanceId(int showInstanceId)
+        {
+            var result = await _logic.GetSeatStatusesByShowInstanceIdAsync(showInstanceId);
+            return Ok(result);
         }
     }
 }

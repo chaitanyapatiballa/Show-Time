@@ -13,7 +13,7 @@ namespace DBModels.Dto
         public string Title { get; set; } = string.Empty;
         public string Duration { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
-        public DateTime? releasedate { get; set; }
+        public DateOnly? Releasedate { get; set; }
 
         public ICollection<Movietheater> MovieTheaters { get; set; } = new List<Movietheater>();
 

@@ -8,21 +8,21 @@ namespace DBModels.Models
         {
             modelBuilder.Entity<Movietheater>(entity =>
             {
-                entity.ToTable("movietheaters");
+                entity.ToTable("Movietheater");
 
                 entity.HasKey(mt => new { mt.Movieid, mt.Theaterid })       
-                      .HasName("movietheaters_pkey");
+                      .HasName("movietheater_pkey");
 
                 entity.Property(mt => mt.Movieid).HasColumnName("movieid");
                 entity.Property(mt => mt.Theaterid).HasColumnName("theaterid");
 
                 entity.HasOne(mt => mt.Movie)
-                      .WithMany(m => m.MovieTheaters)
+                      .WithMany(m => m.Movietheater)
                       .HasForeignKey(mt => mt.Movieid)
                       .HasConstraintName("movietheaters_movieid_fkey");
 
                 entity.HasOne(mt => mt.Theater)
-                      .WithMany(t => t.MovieTheaters)
+                      .WithMany(t => t.Movietheater)
                       .HasForeignKey(mt => mt.Theaterid)
                       .HasConstraintName("movietheaters_theaterid_fkey");
             });

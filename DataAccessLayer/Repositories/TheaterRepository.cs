@@ -12,22 +12,15 @@ public class TheaterRepository
         _context = context;
     }
 
-    public async Task<List<Theater>> GetAllAsync()
-    {
-        return await _context.Theaters.ToListAsync();
-    }
+    public async Task<List<Theater>> GetAllAsync() => await _context.Theaters.ToListAsync();
 
-    public async Task<Theater?> GetByIdAsync(int id)
-    {
-        return await _context.Theaters.FindAsync(id);
-    }
+    public async Task<Theater?> GetByIdAsync(int id) => await _context.Theaters.FindAsync(id);
 
     public async Task AddAsync(Theater theater)
     {
         _context.Theaters.Add(theater);
-        await _context.SaveChangesAsync(); 
+        await _context.SaveChangesAsync();
     }
-
 
     public async Task UpdateAsync(Theater theater)
     {
@@ -41,22 +34,15 @@ public class TheaterRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Showtemplate>> GetAllShowtemplatesAsync()
-    {
-        return await _context.Showtemplates.ToListAsync();
-    }
+    public async Task<List<Showtemplate>> GetAllShowtemplatesAsync() => await _context.Showtemplates.ToListAsync();
 
-    public async Task<Showtemplate?> GetShowtemplateByIdAsync(int id)
-    {
-        return await _context.Showtemplates.FindAsync(id);
-    }
+    public async Task<Showtemplate?> GetShowtemplateByIdAsync(int id) => await _context.Showtemplates.FindAsync(id);
 
     public async Task AddShowtemplateAsync(Showtemplate template)
     {
         _context.Showtemplates.Add(template);
         await _context.SaveChangesAsync();
     }
-
 
     public async Task UpdateShowtemplateAsync(Showtemplate template)
     {
@@ -70,12 +56,9 @@ public class TheaterRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<List<Showinstance>> GetAllShowinstancesAsync() => await _context.Showinstances.ToListAsync();
 
-    public async Task<List<Showinstance>> GetAllShowinstancesAsync() =>
-     await _context.Showinstances.ToListAsync();
-
-    public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) =>
-        await _context.Showinstances.FindAsync(id);
+    public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) => await _context.Showinstances.FindAsync(id);
 
     public async Task AddShowinstanceAsync(Showinstance instance)
     {
@@ -94,6 +77,4 @@ public class TheaterRepository
         _context.Showinstances.Remove(instance);
         await _context.SaveChangesAsync();
     }
-
 }
-

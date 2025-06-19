@@ -27,7 +27,7 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
         {
             Username = dto.Username,
             Email = dto.Email,
-            PasswordHash = hashedPassword,
+            Passwordhash = hashedPassword,
             Role = dto.Role ?? "User"
         };
 
@@ -43,7 +43,7 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
         if (user == null)
             return null;
 
-        bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+        bool isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Passwordhash);
         if (!isValid)
             return null;
 

@@ -13,6 +13,10 @@ public partial class Seat
 
     public int Number { get; set; }
 
+    public decimal Baseprice { get; set; }
+
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
     public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
 
     public virtual Theater Theater { get; set; } = null!;

@@ -25,11 +25,27 @@ public partial class Booking
 
     public int? Showinstanceid { get; set; }
 
+    public decimal? Baseprice { get; set; }
+
+    public decimal? Refundamount { get; set; }
+
+    public bool? Isrefunded { get; set; }
+
+    public DateTime? Cancelledat { get; set; }
+
+    public bool? Emailsent { get; set; }
+
     public virtual ICollection<Billingsummary> Billingsummaries { get; set; } = new List<Billingsummary>();
 
     public virtual Movie? Movie { get; set; }
 
-    public virtual Payment? Payment { get; set; }
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual Seat? Seat { get; set; }
+
+    public virtual Showinstance? Showinstance { get; set; }
 
     public virtual Theater? Theater { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }
