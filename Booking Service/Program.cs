@@ -9,6 +9,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ Load shared config from DBModels (appsettings.shared.json)
+var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
+builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
+
 // Add Controllers and Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -16,7 +20,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "BookingService", Version = "v1" });
 
-    // Add JWT Auth support
     c.AddSecurityDefinition("JWT", new()
     {
         Name = "Authorization",
@@ -43,7 +46,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure PostgreSQL DbContext
+// ✅ Configure PostgreSQL DbContext using shared config
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -53,6 +56,7 @@ builder.Services.AddScoped<BillingsummaryRepository>();
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<BookingLogic>();
 
+// Configure HTTP clients
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("MovieService", client =>
 {
@@ -71,7 +75,7 @@ builder.Services.AddHttpClient("AuthService", client =>
     client.BaseAddress = new Uri("https://localhost:7255");
 });
 
-//  JWT Authentication
+// Configure JWT Authentication
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,7 +91,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
 
-        // token without "Bearer " 
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -104,13 +107,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// Enable Swagger in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//  authentication & authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

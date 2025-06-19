@@ -48,18 +48,18 @@ namespace TheaterService.Controllers
             return CreatedAtAction(nameof(GetTheaterById), new { id = theater.Theaterid }, theater);
         }
 
-        [HttpPost("seed-seats")]
-        public async Task<IActionResult> SeedSeats()
-        {
-            await _logic.AddSeatsForExistingTheatersAsync();
-            return Ok("Seats added for existing theaters.");
-        }
-        [HttpPost("fix-showseatstatus")]
-        public async Task<IActionResult> FixShowSeatStatuses()
-        {
-            await _logic.AddMissingShowseatStatusesAsync();
-            return Ok("✅ Showseatstatuses fixed for all showinstances.");
-        }
+        //[HttpPost("seed-seats")]
+        //public async Task<IActionResult> SeedSeats()
+        //{
+        //    await _logic.AddSeatsForExistingTheatersAsync();
+        //    return Ok("Seats added for existing theaters.");
+        //}
+        //[HttpPost("fix-showseatstatus")]
+        //public async Task<IActionResult> FixShowSeatStatuses()
+        //{
+        //    await _logic.AddMissingShowseatStatusesAsync();
+        //    return Ok("✅ Showseatstatuses fixed for all showinstances.");
+        //}
 
 
         [HttpPut("{id}")]

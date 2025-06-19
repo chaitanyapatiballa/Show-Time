@@ -7,6 +7,9 @@ using PaymentService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
+builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
+
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

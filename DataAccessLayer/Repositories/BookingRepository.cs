@@ -18,17 +18,26 @@ namespace DataAccessLayer.Repositories
             return await _context.Showinstances.FindAsync(id);
         }
 
-        public Task SaveBookingAsync(int showinstanceid, int seatid, int userid)
+        public async Task SaveBookingAsync(int showinstanceid, int seatid, int userid, DateTime showtime)
         {
+            var seat = await _context.Seats.FindAsync(seatid);
+            var showinstance = await _context.Showinstances.FindAsync(showinstanceid);
+            var showtemplate = await _context.Showtemplates.FindAsync(showinstance?.Showtemplateid);
+
             var booking = new Booking
             {
                 Showinstanceid = showinstanceid,
                 Seatid = seatid,
                 Userid = userid,
-                Bookingtime = DateTime.UtcNow
+                Showtime = showtime,
+                Bookingtime = DateTime.UtcNow,
+                Seatnumber = seat?.Number.ToString(),
+                Movieid = showtemplate?.Movieid,
+                Theaterid = showtemplate?.Theaterid,
+                Status = "Booked"
             };
+
             _context.Bookings.Add(booking);
-            return Task.CompletedTask;
         }
 
         public async Task SaveChangesAsync()

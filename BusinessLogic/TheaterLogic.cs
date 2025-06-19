@@ -34,7 +34,7 @@ public class TheaterLogic
 
     public async Task AddAsync(Theater theater, List<int>? movieIds)
     {
-        if (movieIds != null && movieIds.Any())
+        if (!(movieIds == null || movieIds.Count == 0))
         {
             var movies = await _context.Movies
                 .Where(m => movieIds.Contains(m.Movieid))
@@ -69,36 +69,36 @@ public class TheaterLogic
         _context.Seats.AddRange(seats);
         await _context.SaveChangesAsync();
     }
-    public async Task AddSeatsForExistingTheatersAsync()
-    {
-        var theatersWithoutSeats = await _context.Theaters
-            .Where(t => !_context.Seats.Any(s => s.Theaterid == t.Theaterid))
-            .ToListAsync();
+    //public async Task AddSeatsForExistingTheatersAsync()
+    //{
+    //    var theatersWithoutSeats = await _context.Theaters
+    //        .Where(t => !_context.Seats.Any(s => s.Theaterid == t.Theaterid))
+    //        .ToListAsync();
 
-        var seatsToAdd = new List<Seat>();
+    //    var seatsToAdd = new List<Seat>();
 
-        foreach (var theater in theatersWithoutSeats)
-        {
-            int rows = 2; // A to B
-            int seatsPerRow = 10;
+    //    foreach (var theater in theatersWithoutSeats)
+    //    {
+    //        int rows = 2; // A to B
+    //        int seatsPerRow = 10;
 
-            for (char row = 'A'; row < 'A' + rows; row++)
-            {
-                for (int num = 1; num <= seatsPerRow; num++)
-                {
-                    seatsToAdd.Add(new Seat
-                    {
-                        Theaterid = theater.Theaterid,
-                        Row = row.ToString(),
-                        Number = num
-                    });
-                }
-            }
-        }
+    //        for (char row = 'A'; row < 'A' + rows; row++)
+    //        {
+    //            for (int num = 1; num <= seatsPerRow; num++)
+    //            {
+    //                seatsToAdd.Add(new Seat
+    //                {
+    //                    Theaterid = theater.Theaterid,
+    //                    Row = row.ToString(),
+    //                    Number = num
+    //                });
+    //            }
+    //        }
+    //    }
 
-        _context.Seats.AddRange(seatsToAdd);
-        await _context.SaveChangesAsync();
-    }
+    //    _context.Seats.AddRange(seatsToAdd);
+    //    await _context.SaveChangesAsync();
+    //}
 
     public async Task AddMissingShowseatStatusesAsync()
     {
@@ -113,7 +113,7 @@ public class TheaterLogic
                 .Where(s => s.Showinstanceid == instance.Showinstanceid)
                 .ToListAsync();
 
-            if (seatStatuses.Any()) continue; // Already created
+            if (seatStatuses.Count != 0) continue; // Already created
 
             var seats = await _context.Seats
                 .Where(s => s.Theaterid == instance.Showtemplate.Theaterid)
@@ -140,7 +140,7 @@ public class TheaterLogic
         var existingLinks = _context.Movietheaters.Where(mt => mt.Theaterid == theater.Theaterid);
         _context.Movietheaters.RemoveRange(existingLinks);
 
-        if (movieIds != null && movieIds.Any())
+        if (!(movieIds == null || movieIds.Count == 0))
         {
             var movies = await _context.Movies
                 .Where(m => movieIds.Contains(m.Movieid))
@@ -234,11 +234,8 @@ public class TheaterLogic
     {
         var showtemplate = await _context.Showtemplates
             .Include(st => st.Theater)
-            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid);
-
-        if (showtemplate == null)
+            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid) ?? 
             throw new Exception("Invalid Showtemplate ID");
-
         var showinstance = new Showinstance
         {
             Showtemplateid = dto.Showtemplateid,
@@ -273,11 +270,8 @@ public class TheaterLogic
 
         var showtemplate = await _context.Showtemplates
             .Include(st => st.Theater)
-            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid);
-
-        if (showtemplate == null)
+            .FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid) ??
             throw new Exception("Invalid Showtemplate ID");
-
         instance.Showtemplateid = dto.Showtemplateid;
         instance.Showdate = dto.Showdate;
         instance.Showtime = dto.Showtime;

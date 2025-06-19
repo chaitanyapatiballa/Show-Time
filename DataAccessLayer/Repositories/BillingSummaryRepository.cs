@@ -1,7 +1,7 @@
 ﻿using DBModels.Models;
 
-namespace PaymentService.Repositories;
-
+namespace DataAccessLayer.Repositories;
+    
 public class BillingsummaryRepository(AppDbContext context)
 {
     private readonly AppDbContext _context = context;
