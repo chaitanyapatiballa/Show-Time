@@ -18,19 +18,34 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto dto)
     {
-        var success = await _logic.RegisterAsync(dto);
-        if (!success)
-            return BadRequest("User already exists or registration failed.");
-        return Ok("Registration successful");
+        try
+        {
+            var success = await _logic.RegisterAsync(dto);
+            if (!success)
+                return BadRequest("User already exists or registration failed.");
+
+            return Ok("Registration successful");
+        }
+        catch (Exception )
+        {
+              return StatusCode(500, "An error occurred during registration.");
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto dto)
     {
-        var token = await _logic.LoginAsync(dto);
-        if (token == null)
-            return Unauthorized("Invalid credentials");
+        try
+        {
+            var token = await _logic.LoginAsync(dto);
+            if (token == null)
+                return Unauthorized("Invalid credentials");
 
-        return Ok(new { Token = token });
+            return Ok(new { Token = token });
+        }
+        catch (Exception )
+        {
+             return StatusCode(500, "An error occurred during login.");
+        }
     }
 }

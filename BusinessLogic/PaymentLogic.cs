@@ -18,77 +18,108 @@ public class PaymentLogic(
     private readonly BookingRepository _bookingRepo = bookingRepo;
     private readonly AppDbContext _context = context;
 
-    public async Task<Billingsummary> CreateSummaryAsync(BillingsummaryDto dto)
+    public async Task<Billingsummary?> CreateSummaryAsync(BillingsummaryDto dto)
     {
-        var summary = new Billingsummary
+        try
         {
-            Bookingid = dto.Bookingid,
-            Baseamount = dto.Baseamount,
-            Discount = dto.Discount,
-            Gst = dto.Gst,
-            Servicefee = dto.Servicefee,
-            Totalamount = dto.Totalamount
-        };
+            var summary = new Billingsummary
+            {
+                Bookingid = dto.Bookingid,
+                Baseamount = dto.Baseamount,
+                Discount = dto.Discount,
+                Gst = dto.Gst,
+                Servicefee = dto.Servicefee,
+                Totalamount = dto.Totalamount
+            };
 
-        return await _summaryRepo.AddSummaryAsync(summary);
+            return await _summaryRepo.AddSummaryAsync(summary);
+        }
+        catch (Exception ex)
+        {
+            // Log exception (optional)
+            Console.WriteLine($"CreateSummaryAsync error: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task<Payment?> MakePaymentAsync(PaymentDto dto, int userId)
     {
-        var booking = await _context.Bookings.FindAsync(dto.Bookingid);
-        if (booking == null || booking.Status == "Cancelled")
-            return null;
-
-        
-        var paymentDate = DateTime.SpecifyKind(dto.Paymentdate, DateTimeKind.Unspecified);
-
-        var payment = new Payment
+        try
         {
-            Bookingid = dto.Bookingid,
-            Amountpaid = dto.Amountpaid,
-            Paymentmethod = dto.Paymentmethod,
-            Userid = userId, 
-            Paymentdate = paymentDate,
-            Status = "Paid"
-        };
+            var booking = await _context.Bookings.FindAsync(dto.Bookingid);
+            if (booking == null || booking.Status == "Cancelled")
+                return null;
 
-        booking.Status = "Confirmed";
+            var paymentDate = DateTime.SpecifyKind(dto.Paymentdate, DateTimeKind.Unspecified);
 
-        _context.Payments.Add(payment);
-        await _context.SaveChangesAsync();
+            var payment = new Payment
+            {
+                Bookingid = dto.Bookingid,
+                Amountpaid = dto.Amountpaid,
+                Paymentmethod = dto.Paymentmethod,
+                Userid = userId,
+                Paymentdate = paymentDate,
+                Status = "Paid"
+            };
 
-        return payment;
+            booking.Status = "Confirmed";
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            return payment;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"MakePaymentAsync error: {ex.Message}");
+            return null;
+        }
     }
-
 
     public async Task<List<Payment>> GetPaymentsByUserAsync(int userId)
     {
-        return await _paymentRepo.GetPaymentsByUserAsync(userId);
+        try
+        {
+            return await _paymentRepo.GetPaymentsByUserAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"GetPaymentsByUserAsync error: {ex.Message}");
+            return new List<Payment>();
+        }
     }
 
     public async Task<bool> RefundAsync(int bookingId)
     {
-        var booking = await _context.Bookings.FindAsync(bookingId);
-        if (booking == null || booking.Status == "Cancelled") return false;
+        try
+        {
+            var booking = await _context.Bookings.FindAsync(bookingId);
+            if (booking == null || booking.Status == "Cancelled") return false;
 
-        var payment = await _context.Payments.FirstOrDefaultAsync(p => p.Bookingid == bookingId);
-        if (payment == null) return false;
+            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.Bookingid == bookingId);
+            if (payment == null) return false;
 
-        booking.Status = "Cancelled";
-        payment.Status = "Refunded";
-        payment.Refunddate = DateTime.UtcNow;
+            booking.Status = "Cancelled";
+            payment.Status = "Refunded";
+            payment.Refunddate = DateTime.UtcNow;
 
-        // Free the seat again
-        var seatStatus = await _context.Showseatstatuses
-            .FirstOrDefaultAsync(s => s.Seatid == booking.Seatid && s.Showinstanceid == booking.Showinstanceid);
-        if (seatStatus != null)
-            seatStatus.Isbooked = false;
+            // Free the seat again
+            var seatStatus = await _context.Showseatstatuses
+                .FirstOrDefaultAsync(s => s.Seatid == booking.Seatid && s.Showinstanceid == booking.Showinstanceid);
+            if (seatStatus != null)
+                seatStatus.Isbooked = false;
 
-        var showInstance = await _context.Showinstances.FindAsync(booking.Showinstanceid);
-        if (showInstance != null)
-            showInstance.Availableseats++;
+            var showInstance = await _context.Showinstances.FindAsync(booking.Showinstanceid);
+            if (showInstance != null)
+                showInstance.Availableseats++;
 
-        await _context.SaveChangesAsync();
-        return true;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"RefundAsync error: {ex.Message}");
+            return false;
+        }
     }
 }

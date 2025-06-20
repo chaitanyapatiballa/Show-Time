@@ -16,30 +16,46 @@ public class AuthLogic(AuthRepository userRepo, IConfiguration config)
 
     public async Task<bool> RegisterAsync(RegisterDto dto)
     {
-        if (await _userRepo.GetByEmailAsync(dto.Email) != null)
-            return false;
-
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-        var user = new User
+        try
         {
-            Username = dto.Username,
-            Email = dto.Email,
-            Passwordhash = hashedPassword,
-            Role = dto.Role ?? "User"
-        };
+            if (await _userRepo.GetByEmailAsync(dto.Email) != null)
+                return false;
 
-        await _userRepo.AddUserAsync(user);
-        return true;
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+            var user = new User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                Passwordhash = hashedPassword,
+                Role = dto.Role ?? "User"
+            };
+
+            await _userRepo.AddUserAsync(user);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in RegisterAsync: {ex.Message}");
+            return false;
+        }
     }
 
     public async Task<string?> LoginAsync(LoginDto dto)
     {
-        var user = await _userRepo.GetByEmailAsync(dto.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Passwordhash))
-            return null;
+        try
+        {
+            var user = await _userRepo.GetByEmailAsync(dto.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.Passwordhash))
+                return null;
 
-        return GenerateJwtToken(user);
+            return GenerateJwtToken(user);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in LoginAsync: {ex.Message}");
+            return null;
+        }
     }
 
     private string GenerateJwtToken(User user)

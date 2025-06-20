@@ -22,7 +22,7 @@ public class TheaterLogic
 
     public async Task AddAsync(Theater theater, List<int>? movieIds)
     {
-        if (movieIds?.Any() == true)
+        if ((movieIds?.Any()) == true)
         {
             var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
             theater.Movietheater = movies.Select(m => new Movietheater { Movieid = m.Movieid, Theater = theater }).ToList();
@@ -56,7 +56,11 @@ public class TheaterLogic
         var existingLinks = _context.Movietheater.Where(mt => mt.Theaterid == theater.Theaterid);
         _context.Movietheater.RemoveRange(existingLinks);
 
-        if (movieIds?.Any() == true)
+        if ((movieIds?.Any()) != true)
+        {
+
+        }
+        else
         {
             var movies = await _context.Movies.Where(m => movieIds.Contains(m.Movieid)).ToListAsync();
             theater.Movietheater = movies.Select(m => new Movietheater { Movieid = m.Movieid, Theaterid = theater.Theaterid }).ToList();
@@ -117,12 +121,12 @@ public class TheaterLogic
 
     public async Task<Showinstance?> GetShowinstanceByIdAsync(int id) => await _repository.GetShowinstanceByIdAsync(id);
 
-    public async Task<List<Showinstance>> GetShowinstancesByMovieAsync(int movieId)
+    public async Task<List<Showinstance>> GetShowinstancesByMovieAsync(int movieId, Showtemplate? st)
     {
         return await _context.Showinstances
             .Include(si => si.Showtemplate)
-            .ThenInclude(st => st.Theater)
-            .Where(si => si.Showtemplate.Movieid == movieId && si.Showdate >= DateOnly.FromDateTime(DateTime.Today))
+            .ThenInclude(showtemplate => showtemplate!.Theater) 
+            .Where(si => si.Showtemplate != null && si.Showtemplate.Movieid == movieId && si.Showdate >= DateOnly.FromDateTime(DateTime.Today))
             .ToListAsync();
     }
 
@@ -138,6 +142,9 @@ public class TheaterLogic
     {
         var showtemplate = await _context.Showtemplates.Include(st => st.Theater).FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid)
             ?? throw new Exception("Invalid Showtemplate ID");
+
+        if (showtemplate.Theater == null)
+            throw new Exception("Theater information is missing for the specified Showtemplate.");
 
         var showinstance = new Showinstance
         {
@@ -170,8 +177,9 @@ public class TheaterLogic
         var instance = await _repository.GetShowinstanceByIdAsync(id);
         if (instance == null) return false;
 
-        var showtemplate = await _context.Showtemplates.Include(st => st.Theater).FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid)
-            ?? throw new Exception("Invalid Showtemplate ID");
+        var showtemplate = await _context.Showtemplates.Include(st => st.Theater).FirstOrDefaultAsync(st => st.Showtemplateid == dto.Showtemplateid);
+        if (showtemplate == null || showtemplate.Theater == null)
+            throw new Exception("Invalid Showtemplate ID or missing Theater information.");
 
         instance.Showtemplateid = dto.Showtemplateid;
         instance.Showdate = dto.Showdate;

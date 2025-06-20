@@ -84,7 +84,8 @@ namespace DataAccessLayer.Repositories
                 .Where(s =>
                     s.Showtemplate.Movieid == movieId &&
                     s.Showtemplate.Theaterid == theaterId &&
-                    s.Showdate == date)
+                    s.Showdate.HasValue && 
+                    s.Showdate.Value == date) 
                 .Select(s => new ShowinstanceDto
                 {
                     Showinstanceid = s.Showinstanceid,

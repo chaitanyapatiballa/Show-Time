@@ -129,9 +129,9 @@ namespace TheaterService.Controllers
         }
 
         [HttpGet("showinstances/by-movie/{movieId}")]
-        public async Task<ActionResult<List<Showinstance>>> GetShowinstancesByMovie(int movieId)
+        public async Task<ActionResult<List<Showinstance>>> GetShowinstancesByMovie(int movieId, Showtemplate showtemplate)
         {
-            var result = await _logic.GetShowinstancesByMovieAsync(movieId);
+            var result = await _logic.GetShowinstancesByMovieAsync(movieId, showtemplate);
             return Ok(result);
         }
 

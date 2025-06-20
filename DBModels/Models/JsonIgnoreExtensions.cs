@@ -7,10 +7,10 @@ namespace DBModels.Models
     public partial class Movie
     {
         [JsonIgnore]
-        public ICollection<Booking> Bookings { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
 
         [JsonIgnore]
-        public ICollection<Showtemplate> Showtemplates { get; set; }
+        public ICollection<Showtemplate>? Showtemplates { get; set; }
 
         [JsonIgnore]
         public ICollection<Movietheater> Movietheater { get; set; } = new List<Movietheater>();
@@ -24,13 +24,13 @@ namespace DBModels.Models
         public ICollection<Movietheater> Movietheater { get; set; } = new List<Movietheater>();
 
         [JsonIgnore]
-        public ICollection<Booking> Bookings { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
 
         [JsonIgnore]
-        public ICollection<Showtemplate> Showtemplates { get; set; }
+        public ICollection<Showtemplate>? Showtemplates { get; set; }
 
         [JsonIgnore]
-        public ICollection<Seat> Seats { get; set; }
+        public ICollection<Seat>? Seats { get; set; }
         public virtual ICollection<Movie> Movies { get; set; } = new List<Movie>();
     }
 
@@ -67,7 +67,7 @@ namespace DBModels.Models
         public Showtemplate? Showtemplate { get; set; }
 
         [JsonIgnore]
-        public ICollection<Showseatstatus> Showseatstatuses { get; set; }
+        public ICollection<Showseatstatus>? Showseatstatuses { get; set; }
     }
 
     //public partial class Showseatstatus
@@ -82,10 +82,10 @@ namespace DBModels.Models
     public partial class Seat
     {
         [JsonIgnore]
-        public Theater Theater { get; set; }
+        public Theater? Theater { get; set; }
 
         [JsonIgnore]
-        public ICollection<Showseatstatus> Showseatstatuses { get; set; }
+        public ICollection<Showseatstatus>? Showseatstatuses { get; set; }
     }
 
     //public partial class Payment

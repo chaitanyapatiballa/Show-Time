@@ -20,47 +20,82 @@ namespace Booking_Service.Controllers
         [HttpPost("bookseat")]
         public async Task<IActionResult> BookSeat(BookingDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                return Unauthorized("User ID not found in token");
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                    return Unauthorized("User ID not found in token");
 
-            int userId = int.Parse(userIdClaim.Value);
-            var result = await _logic.BookSeatAsync(dto, userId);
+                int userId = int.Parse(userIdClaim.Value);
+                var (success, amount, errorMessage) = await _logic.BookSeatAsync(dto, userId);
 
-            return result.Success
-                ? Ok($"Seat booked. Amount: ₹{result.Amount}")
-                : BadRequest(result.ErrorMessage);
+                return success
+                    ? Ok("Seat booked. Amount: ₹{amount}")
+                    : BadRequest(errorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while booking the seat: {ex.Message}");
+            }
         }
 
         [HttpPost("cancel/{bookingId}")]
         public async Task<IActionResult> CancelBooking(int bookingId)
         {
-            var success = await _logic.CancelBookingAsync(bookingId);
-            return success ? Ok("Booking cancelled.") : BadRequest("Cancellation failed.");
+            try
+            {
+                var success = await _logic.CancelBookingAsync(bookingId);
+                return success ? Ok("Booking cancelled.") : BadRequest("Cancellation failed.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while cancelling the booking: {ex.Message}");
+            }
         }
 
         [HttpGet("shows")]
         public async Task<IActionResult> GetShows(int movieId, int theaterId, DateOnly date)
         {
-            var shows = await _logic.GetShowsAsync(movieId, theaterId, date);
-            if (shows == null || shows.Count == 0)
-                return NotFound("No shows found for this movie and theater on the given date.");
+            try
+            {
+                var shows = await _logic.GetShowsAsync(movieId, theaterId, date);
+                if (shows == null || shows.Count == 0)
+                    return NotFound("No shows found for this movie and theater on the given date.");
 
-            return Ok(shows);
+                return Ok(shows);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while fetching shows: {ex.Message}");
+            }
         }
 
         [HttpGet("seats")]
         public async Task<IActionResult> GetAvailableSeats(int showinstanceId)
         {
-            var seats = await _logic.GetAvailableSeatsAsync(showinstanceId);
-            return Ok(seats);
+            try
+            {
+                var seats = await _logic.GetAvailableSeatsAsync(showinstanceId);
+                return Ok(seats);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while fetching seats: {ex.Message}");
+            }
         }
 
         [HttpPost("autogenerate-next-day-shows")]
         public async Task<IActionResult> AutoGenerateNextDayShows()
         {
-            await _logic.GenerateNextDayShowinstancesAsync();
-            return Ok("Next day's showinstances created successfully.");
+            try
+            {
+                await _logic.GenerateNextDayShowinstancesAsync();
+                return Ok("Next day's showinstances created successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while generating shows: {ex.Message}");
+            }
         }
     }
 }

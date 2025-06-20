@@ -5,7 +5,7 @@ using PaymentService.DTOs;
 using PaymentService.Logic;
 using System.Security.Claims;
 
-namespace Payment_Service.Controllers;
+namespace PaymentService.Controllers;
 
 [Authorize] 
 [ApiController]
@@ -22,33 +22,57 @@ public class PaymentController : ControllerBase
     [HttpPost("billing-summary")]
     public async Task<IActionResult> AddSummary(BillingsummaryDto dto)
     {
-        var result = await _logic.CreateSummaryAsync(dto);
-        return Ok(result);
+        try
+        {
+            var result = await _logic.CreateSummaryAsync(dto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+           
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpPost("make-payment")]
     public async Task<IActionResult> MakePayment(PaymentDto dto)
     {
-        if (!User.Identity?.IsAuthenticated ?? false)
-            return Unauthorized("User is not authenticated");
+        try
+        {
+            if (!User.Identity?.IsAuthenticated ?? false)
+                return Unauthorized("User is not authenticated");
 
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null)
-            return Unauthorized("User not found in token");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("User not found in token");
 
-        int userId = int.Parse(userIdClaim.Value);
+            int userId = int.Parse(userIdClaim.Value);
 
-        var result = await _logic.MakePaymentAsync(dto, userId);
-        if (result == null)
-            return BadRequest("Payment failed.");
+            var result = await _logic.MakePaymentAsync(dto, userId);
+            if (result == null)
+                return BadRequest("Payment failed.");
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpGet("user/{userId}/payments")]
     public async Task<IActionResult> GetUserPayments(int userId)
     {
-        var payments = await _logic.GetPaymentsByUserAsync(userId);
-        return Ok(payments);
+        try
+        {
+            var payments = await _logic.GetPaymentsByUserAsync(userId);
+            return Ok(payments);
+        }
+        catch (Exception ex)
+        {
+           
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }
