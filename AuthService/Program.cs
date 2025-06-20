@@ -9,9 +9,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
-builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
-
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

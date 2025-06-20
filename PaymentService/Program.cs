@@ -7,10 +7,7 @@ using PaymentService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
-builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
-
-// Add services
+// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,15 +16,15 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 // Dependency Injection
 builder.Services.AddScoped<PaymentRepository>();
-builder.Services.AddScoped<PaymentLogic>();
 builder.Services.AddScoped<BillingsummaryRepository>();
+builder.Services.AddScoped<BookingRepository>(); 
+builder.Services.AddScoped<PaymentLogic>();
 
 var app = builder.Build();
 
-// Swagger
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

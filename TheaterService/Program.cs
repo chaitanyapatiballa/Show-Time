@@ -5,23 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
-builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
-
-// Add services to the container
+// Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register AppDbContext using PostgreSQL
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Dependency Injection for TheaterService
 builder.Services.AddScoped<TheaterRepository>();
 builder.Services.AddScoped<TheaterLogic>();
 
 var app = builder.Build();
 
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,4 +30,3 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-

@@ -9,9 +9,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Load shared config from DBModels (appsettings.shared.json)
-var sharedConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.shared.json");
-builder.Configuration.AddJsonFile(sharedConfigPath, optional: false, reloadOnChange: true);
 
 // Add Controllers and Swagger
 builder.Services.AddControllers();

@@ -26,10 +26,5 @@
 	</ItemGroup>
 
 	<!-- ✅ This will copy appsettings.shared.json to bin/Debug/net8.0 -->
-	<ItemGroup>
-		<None Update="appsettings.shared.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 
 </Project>

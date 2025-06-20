@@ -27,7 +27,7 @@ namespace TheaterService.Controllers
         }
 
         [HttpPost("Add-Theater")]
-        public async Task<ActionResult> CreateTheater([FromBody] TheaterDto dto)
+        public async Task<ActionResult> CreateTheater(TheaterDto dto)
         {
             var theater = new Theater { Name = dto.Name, Location = dto.Location, Capacity = dto.Capacity };
             await _logic.AddAsync(theater, dto.MovieIds);
@@ -35,7 +35,7 @@ namespace TheaterService.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateTheater(int id, [FromBody] TheaterDto dto)
+        public async Task<ActionResult> UpdateTheater(int id, TheaterDto dto)
         {
             var existing = await _logic.GetByIdAsync(id);
             if (existing == null) return NotFound();
@@ -101,7 +101,7 @@ namespace TheaterService.Controllers
         }
 
         [HttpPost("showinstances")]
-        public async Task<ActionResult> CreateShowinstance([FromBody] ShowinstanceDto dto)
+        public async Task<ActionResult> CreateShowinstance(ShowinstanceDto dto)
         {
             try
             {
@@ -115,7 +115,7 @@ namespace TheaterService.Controllers
         }
 
         [HttpPut("showinstances/{id}")]
-        public async Task<ActionResult> UpdateShowinstance(int id, [FromBody] ShowinstanceDto dto)
+        public async Task<ActionResult> UpdateShowinstance(int id, ShowinstanceDto dto)
         {
             var updated = await _logic.UpdateShowinstanceAsync(id, dto);
             return !updated ? NotFound() : NoContent();

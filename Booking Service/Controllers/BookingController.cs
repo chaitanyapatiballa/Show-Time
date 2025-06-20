@@ -18,7 +18,7 @@ namespace Booking_Service.Controllers
         }
 
         [HttpPost("bookseat")]
-        public async Task<IActionResult> BookSeat([FromBody] BookingDto dto)
+        public async Task<IActionResult> BookSeat(BookingDto dto)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
@@ -40,7 +40,7 @@ namespace Booking_Service.Controllers
         }
 
         [HttpGet("shows")]
-        public async Task<IActionResult> GetShows([FromQuery] int movieId, [FromQuery] int theaterId, [FromQuery] DateOnly date)
+        public async Task<IActionResult> GetShows(int movieId, int theaterId, DateOnly date)
         {
             var shows = await _logic.GetShowsAsync(movieId, theaterId, date);
             if (shows == null || shows.Count == 0)
@@ -50,7 +50,7 @@ namespace Booking_Service.Controllers
         }
 
         [HttpGet("seats")]
-        public async Task<IActionResult> GetAvailableSeats([FromQuery] int showinstanceId)
+        public async Task<IActionResult> GetAvailableSeats(int showinstanceId)
         {
             var seats = await _logic.GetAvailableSeatsAsync(showinstanceId);
             return Ok(seats);
