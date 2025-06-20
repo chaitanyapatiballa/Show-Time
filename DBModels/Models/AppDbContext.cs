@@ -33,11 +33,12 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Theater> Theaters { get; set; }
 
-    public DbSet<Movietheater> Movietheater { get; set; }   
-
     public virtual DbSet<User> Users { get; set; }
 
+    public DbSet<Movietheater> Movietheater { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=showtime_db;Username=postgres;Password=Admin");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -150,25 +151,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(200)
                 .HasColumnName("title");
-
-            entity.HasMany(d => d.Theaters).WithMany(p => p.Movies)
-                .UsingEntity<Dictionary<string, object>>(
-                    "Movietheater",
-                    r => r.HasOne<Theater>().WithMany()
-                        .HasForeignKey("Theaterid")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("movietheaters_theaterid_fkey"),
-                    l => l.HasOne<Movie>().WithMany()
-                        .HasForeignKey("Movieid")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("movietheaters_movieid_fkey"),
-                    j =>
-                    {
-                        j.HasKey("Movieid", "Theaterid").HasName("movietheaters_pkey");
-                        j.ToTable("movietheaters");
-                        j.IndexerProperty<int>("Movieid").HasColumnName("movieid");
-                        j.IndexerProperty<int>("Theaterid").HasColumnName("theaterid");
-                    });
         });
 
         modelBuilder.Entity<Payment>(entity =>

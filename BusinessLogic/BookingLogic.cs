@@ -44,6 +44,7 @@ namespace BusinessLogic
                 showinstance.Showtime.Value.Minute,
                 showinstance.Showtime.Value.Second
             );
+            combinedShowtime = DateTime.SpecifyKind(combinedShowtime, DateTimeKind.Unspecified);
 
             decimal seatPrice = await _repository.GetSeatPriceAsync(dto.Seatid);
 

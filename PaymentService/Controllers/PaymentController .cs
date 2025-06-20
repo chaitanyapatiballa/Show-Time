@@ -1,10 +1,13 @@
 ﻿using DBModels.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService.DTOs;
 using PaymentService.Logic;
+using System.Security.Claims;
 
 namespace Payment_Service.Controllers;
 
+[Authorize] 
 [ApiController]
 [Route("api/[controller]")]
 public class PaymentController : ControllerBase
@@ -26,7 +29,16 @@ public class PaymentController : ControllerBase
     [HttpPost("make-payment")]
     public async Task<IActionResult> MakePayment(PaymentDto dto)
     {
-        var result = await _logic.MakePaymentAsync(dto);
+        if (!User.Identity?.IsAuthenticated ?? false)
+            return Unauthorized("User is not authenticated");
+
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+            return Unauthorized("User not found in token");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        var result = await _logic.MakePaymentAsync(dto, userId);
         if (result == null)
             return BadRequest("Payment failed.");
 

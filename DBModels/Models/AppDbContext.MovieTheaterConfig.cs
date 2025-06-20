@@ -8,7 +8,7 @@ namespace DBModels.Models
         {
             modelBuilder.Entity<Movietheater>(entity =>
             {
-                entity.ToTable("Movietheater");
+                entity.ToTable("movietheaters");
 
                 entity.HasKey(mt => new { mt.Movieid, mt.Theaterid })       
                       .HasName("movietheater_pkey");

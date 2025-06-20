@@ -33,18 +33,22 @@ public class PaymentLogic(
         return await _summaryRepo.AddSummaryAsync(summary);
     }
 
-    public async Task<Payment?> MakePaymentAsync(PaymentDto dto)
+    public async Task<Payment?> MakePaymentAsync(PaymentDto dto, int userId)
     {
         var booking = await _context.Bookings.FindAsync(dto.Bookingid);
-        if (booking == null || booking.Status == "Cancelled") return null;
+        if (booking == null || booking.Status == "Cancelled")
+            return null;
+
+        
+        var paymentDate = DateTime.SpecifyKind(dto.Paymentdate, DateTimeKind.Unspecified);
 
         var payment = new Payment
         {
             Bookingid = dto.Bookingid,
             Amountpaid = dto.Amountpaid,
             Paymentmethod = dto.Paymentmethod,
-            Userid = dto.Userid,
-            Paymentdate = dto.Paymentdate,
+            Userid = userId, 
+            Paymentdate = paymentDate,
             Status = "Paid"
         };
 
@@ -55,6 +59,7 @@ public class PaymentLogic(
 
         return payment;
     }
+
 
     public async Task<List<Payment>> GetPaymentsByUserAsync(int userId)
     {

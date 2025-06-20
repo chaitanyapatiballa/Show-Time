@@ -6,26 +6,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+// Add controllers with JSON options
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
-//  Swagger with JWT auth support
+// Swagger with JWT support
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "AuthService", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthService", Version = "v1" });
 
-    c.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
+    // Swagger JWT setup
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
+        Description = "Enter JWT token **without** the 'Bearer ' prefix",
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter JWT token **without** 'Bearer ' prefix"
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -36,7 +42,7 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Authorization"
+                    Id = "Bearer"
                 }
             },
             new string[] {}
@@ -44,17 +50,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//  DB Context
+// Configure EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//  DI for Repos and Logic
-builder.Services.AddScoped<AuthRepository>();
-builder.Services.AddScoped<AuthLogic>();
-
-//  JWT Authentication Setup
+// JWT Authentication
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,7 +74,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 
-    // Accept raw tokens without "Bearer"
+    // Accept raw tokens without "Bearer" prefix
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
@@ -83,15 +84,18 @@ builder.Services.AddAuthentication(options =>
             {
                 context.Token = token;
             }
-
             return Task.CompletedTask;
         }
     };
 });
 
+// Dependency Injection
+builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<AuthLogic>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -100,7 +104,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); 
+app.UseAuthentication(); // Order matters!
 app.UseAuthorization();
 
 app.MapControllers();

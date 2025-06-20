@@ -41,8 +41,8 @@ namespace DataAccessLayer.Repositories
                 Showinstanceid = showinstanceid,
                 Seatid = seatid,
                 Userid = userid,
-                Showtime = showtime,
-                Bookingtime = DateTime.UtcNow,
+                Showtime = DateTime.SpecifyKind(showtime, DateTimeKind.Unspecified),
+                Bookingtime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
                 Seatnumber = seat?.Number.ToString(),
                 Movieid = showtemplate?.Movieid,
                 Theaterid = showtemplate?.Theaterid,
@@ -52,6 +52,7 @@ namespace DataAccessLayer.Repositories
 
             _context.Bookings.Add(booking);
         }
+
 
         public async Task<bool> CancelBookingAsync(int bookingId)
         {

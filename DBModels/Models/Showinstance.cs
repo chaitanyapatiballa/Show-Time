@@ -17,7 +17,7 @@ public partial class Showinstance
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
+    //public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
 
-    public virtual Showtemplate? Showtemplate { get; set; }
+    //public virtual Showtemplate? Showtemplate { get; set; }
 }

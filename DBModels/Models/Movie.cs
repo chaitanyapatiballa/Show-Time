@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace DBModels.Models;
 
@@ -16,11 +15,9 @@ public partial class Movie
 
     public string? Genre { get; set; }
 
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    //public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
+    //public virtual ICollection<Showtemplate> Showtemplates { get; set; } = new List<Showtemplate>();
 
-    public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
-    [JsonIgnore]
-    public ICollection<Movietheater> Movietheater { get; set; } = new List<Movietheater>();
+    //public virtual ICollection<Theater> Theaters { get; set; } = new List<Theater>();
 }

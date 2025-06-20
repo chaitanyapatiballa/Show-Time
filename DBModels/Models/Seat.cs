@@ -17,7 +17,7 @@ public partial class Seat
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
-    public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
+    //public virtual ICollection<Showseatstatus> Showseatstatuses { get; set; } = new List<Showseatstatus>();
 
-    public virtual Theater Theater { get; set; } = null!;
+    //public virtual Theater Theater { get; set; } = null!;
 }
