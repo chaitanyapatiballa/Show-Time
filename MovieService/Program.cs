@@ -6,6 +6,42 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Clear default sources
+builder.Configuration.Sources.Clear();
+
+// Get environment
+var env = builder.Environment;
+
+// Find and load envsettings.json from the solution root
+var configPath = FindSolutionRootContaining("envsettings.json");
+builder.Configuration.AddJsonFile(configPath, optional: false, reloadOnChange: true);
+
+// Optionally add user secrets
+if (env.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+// Local function to walk up the directory tree
+string FindSolutionRootContaining(string fileName)
+{
+    var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+    while (dir != null)
+    {
+        var fullPath = Path.Combine(dir.FullName, fileName);
+        if (File.Exists(fullPath))
+            return fullPath;
+
+        dir = dir.Parent;
+    }
+
+    throw new FileNotFoundException($"{fileName} not found in any parent directory.");
+}
+
+
+
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

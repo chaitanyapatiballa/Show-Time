@@ -9,10 +9,43 @@ using PaymentService.Logic;
 using PaymentService.Repositories;
 using System.Text;
 using System.Text.Json.Serialization;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// --- JSON & Controller Setup ---
+// Clear default sources
+builder.Configuration.Sources.Clear();
+
+// Get environment
+var env = builder.Environment;
+
+// Find and load envsettings.json from the solution root
+var configPath = FindSolutionRootContaining("envsettings.json");
+builder.Configuration.AddJsonFile(configPath, optional: false, reloadOnChange: true);
+
+// Optionally add user secrets
+if (env.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+// Local function to walk up the directory tree
+string FindSolutionRootContaining(string fileName)
+{
+    var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+    while (dir != null)
+    {
+        var fullPath = Path.Combine(dir.FullName, fileName);
+        if (File.Exists(fullPath))
+            return fullPath;
+
+        dir = dir.Parent;
+    }
+
+    throw new FileNotFoundException($"{fileName} not found in any parent directory.");
+}
+
+
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -20,17 +53,15 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-// --- EF Core ---
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// --- Register Repositories & Logic ---
+
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<BillingsummaryRepository>();
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<PaymentLogic>();
 
-// --- JWT Authentication (Raw token - no "Bearer ") ---
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -53,14 +84,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var token = context.Request.Headers["Authorization"].FirstOrDefault();
                 if (!string.IsNullOrWhiteSpace(token))
                 {
-                    context.Token = token; // ⬅️ Pick raw token
+                    context.Token = token; 
                 }
                 return Task.CompletedTask;
             }
         };
     });
 
-// --- Swagger with Raw Token Support ---
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentService API", Version = "v1" });
@@ -91,7 +121,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// --- Middleware Pipeline ---
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -99,7 +129,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();    // Must be before UseAuthorization
+app.UseAuthentication();    
 app.UseAuthorization();
 
 app.MapControllers();
