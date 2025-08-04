@@ -1,6 +1,7 @@
 ﻿using DataAccessLayer.Repositories;
 using DBModels.Dto;
 using DBModels.Models;
+using MessagingLibrary;
 using Microsoft.EntityFrameworkCore;
 using PaymentService.DTOs;
 using PaymentService.Repositories;
@@ -11,12 +12,15 @@ public class PaymentLogic(
     BillingsummaryRepository summaryRepo,
     PaymentRepository paymentRepo,
     BookingRepository bookingRepo,
-    AppDbContext context)
+    AppDbContext context, IRabbitMQPublisher publisher)
 {
     private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
     private readonly PaymentRepository _paymentRepo = paymentRepo;
     private readonly BookingRepository _bookingRepo = bookingRepo;
     private readonly AppDbContext _context = context;
+    private readonly IRabbitMQPublisher _publisher;
+
+
 
     public async Task<Billingsummary?> CreateSummaryAsync(BillingsummaryDto dto)
     {
@@ -66,6 +70,13 @@ public class PaymentLogic(
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
+
+           
+            string message = $"Payment confirmed for Booking ID: {dto.Bookingid}, User: {userId}, Amount: ₹{dto.Amountpaid}";
+            _publisher.Publish("payment-queue", message);
+
+            return payment;
+
 
             return payment;
         }

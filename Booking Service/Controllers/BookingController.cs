@@ -1,8 +1,10 @@
 ﻿using BusinessLogic;
 using DBModels.Dto;
 using DBModels.Models;
+using MessagingLibrary;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+
 
 namespace Booking_Service.Controllers
 {
@@ -11,10 +13,12 @@ namespace Booking_Service.Controllers
     public class BookingController : ControllerBase
     {
         private readonly BookingLogic _logic;
+        private readonly IRabbitMQPublisher _publisher;
 
-        public BookingController(BookingLogic logic)
+        public BookingController(BookingLogic logic, IRabbitMQPublisher publisher)
         {
             _logic = logic;
+            _publisher = publisher;
         }
 
         [HttpPost("bookseat")]
@@ -29,9 +33,16 @@ namespace Booking_Service.Controllers
                 int userId = int.Parse(userIdClaim.Value);
                 var (success, amount, errorMessage) = await _logic.BookSeatAsync(dto, userId);
 
-                return success
-                    ? Ok("Seat booked. Amount: ₹{amount}")
-                    : BadRequest(errorMessage);
+                if (success)
+                {
+                    // ✅ Publish to RabbitMQ after successful booking
+                    var message = $"User {userId} booked seat for ShowId {dto.Seatid}, Seats: {string.Join(",", dto.SeatNumbers)}, Amount: ₹{amount}";
+                    _publisher.Publish("booking-queue", message);
+
+                    return Ok($"Seat booked. Amount: ₹{amount}");
+                }
+
+                return BadRequest(errorMessage);
             }
             catch (Exception ex)
             {
