@@ -1,6 +1,7 @@
 ﻿using BusinessLogic;
 using DataAccessLayer.Repositories;
 using DBModels.Models;
+using MessagingLibrary;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // --- JSON & Controller Setup ---
 builder.Services.AddControllers()
@@ -23,6 +25,12 @@ builder.Services.AddControllers()
 // --- EF Core ---
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// RabbitMQ
+builder.Services.AddSingleton<IRabbitMQPublisher>(sp =>
+    new RabbitMQPublisher(configuration["RabbitMQ:ConnectionString"]));
+builder.Services.AddSingleton<IRabbitMQConsumer>(sp =>
+    new RabbitMQConsumer(configuration["RabbitMQ:ConnectionString"]));
 
 // --- Register Repositories & Logic ---
 builder.Services.AddScoped<PaymentRepository>();

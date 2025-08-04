@@ -1,10 +1,12 @@
 ﻿using BusinessLogic;
 using DataAccessLayer.Repositories;
 using DBModels.Models;
+using MessagingLibrary;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -21,6 +23,12 @@ builder.Services.AddSwaggerGen();
 // Configure PostgreSQL connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// RabbitMQ
+builder.Services.AddSingleton<IRabbitMQPublisher>(sp =>
+    new RabbitMQPublisher(configuration["RabbitMQ:ConnectionString"]));
+builder.Services.AddSingleton<IRabbitMQConsumer>(sp =>
+    new RabbitMQConsumer(configuration["RabbitMQ:ConnectionString"]));
 
 // Register custom services and repositories
 builder.Services.AddScoped<MovieRepository>();

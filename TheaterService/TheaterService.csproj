@@ -20,7 +20,7 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.8" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
 
@@ -30,6 +30,7 @@
 
 	  <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
     <ProjectReference Include="..\DBModels\DBModels.csproj" />
+    <ProjectReference Include="..\MessagingLibrary\MessagingLibrary.csproj" />
   </ItemGroup>
 
 </Project>

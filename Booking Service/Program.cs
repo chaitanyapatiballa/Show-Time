@@ -1,6 +1,7 @@
 ﻿using BusinessLogic;
 using DataAccessLayer.Repositories;
 using DBModels.Models;
+using MessagingLibrary;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +10,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
+// Add Controllers and configure JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -17,9 +20,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-
-// Add Controllers and Swagger
-builder.Services.AddControllers();
+// Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -51,37 +52,36 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Configure PostgreSQL DbContext using shared config
+// PostgreSQL DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-// Register services
+// RabbitMQ
+builder.Services.AddSingleton<IRabbitMQPublisher>(sp =>
+    new RabbitMQPublisher(configuration["RabbitMQ:ConnectionString"]));
+builder.Services.AddSingleton<IRabbitMQConsumer>(sp =>
+    new RabbitMQConsumer(configuration["RabbitMQ:ConnectionString"]));
+
+// Register Repositories and Logic
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<BillingsummaryRepository>();
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<BookingLogic>();
 
-// Configure HTTP clients
+// HTTP Clients
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient("MovieService", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7105");
-});
+    client.BaseAddress = new Uri("https://localhost:7105"));
 builder.Services.AddHttpClient("TheaterService", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7106");
-});
+    client.BaseAddress = new Uri("https://localhost:7106"));
 builder.Services.AddHttpClient("PaymentService", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7107");
-});
+    client.BaseAddress = new Uri("https://localhost:7107"));
 builder.Services.AddHttpClient("AuthService", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7255");
-});
+    client.BaseAddress = new Uri("https://localhost:7255"));
 
-// Configure JWT Authentication
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+// JWT Authentication
+var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -91,8 +91,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = configuration["Jwt:Issuer"],
+            ValidAudience = configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
 
@@ -112,7 +112,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Enable Swagger in Development
+// Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
