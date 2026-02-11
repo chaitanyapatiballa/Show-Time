@@ -117,6 +117,18 @@ public class TheaterRepository : ITheaterRepository
             .Include(si => si.Showtemplate)
             .ThenInclude(showtemplate => showtemplate!.Theater) 
             .Where(si => si.Showtemplate != null && si.Showtemplate.Movieid == movieId && si.Showdate >= DateOnly.FromDateTime(DateTime.Today))
+    .ToListAsync();
+    }
+
+    public async Task<List<Showinstance>> GetShowinstancesByMovieTheaterAndDateAsync(int movieId, int theaterId, DateOnly date)
+    {
+        return await _context.Showinstances
+            .Include(si => si.Showtemplate)
+            .Where(si =>
+                si.Showtemplate != null &&
+                si.Showtemplate.Movieid == movieId &&
+                si.Showtemplate.Theaterid == theaterId &&
+                si.Showdate == date)
             .ToListAsync();
     }
 

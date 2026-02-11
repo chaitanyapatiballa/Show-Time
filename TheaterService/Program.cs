@@ -5,8 +5,14 @@ using MessagingLibrary;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+builder.Host.UseSerilog((context, configuration) => configuration.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 
 // Services
 builder.Services.AddControllers()
@@ -15,6 +21,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BusinessLogic.Validators.BookingDtoValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

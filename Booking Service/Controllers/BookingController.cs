@@ -44,28 +44,5 @@ namespace Booking_Service.Controllers
             return success ? Ok("Booking cancelled.") : BadRequest("Cancellation failed.");
         }
 
-        [HttpGet("shows")]
-        public async Task<IActionResult> GetShows(int movieId, int theaterId, DateOnly date)
-        {
-            var shows = await _logic.GetShowsAsync(movieId, theaterId, date);
-            if (shows == null || shows.Count == 0)
-                return NotFound("No shows found for this movie and theater on the given date.");
-
-            return Ok(shows);
-        }
-
-        [HttpGet("seats")]
-        public async Task<IActionResult> GetAvailableSeats(int showinstanceId)
-        {
-            var seats = await _logic.GetAvailableSeatsAsync(showinstanceId);
-            return Ok(seats);
-        }
-
-        [HttpPost("autogenerate-next-day-shows")]
-        public async Task<IActionResult> AutoGenerateNextDayShows()
-        {
-            await _logic.GenerateNextDayShowinstancesAsync();
-            return Ok("Next day's showinstances created successfully.");
-        }
     }
 }

@@ -12,8 +12,14 @@ using PaymentService.Repositories;
 using System.Text;
 using System.Text.Json.Serialization;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+builder.Host.UseSerilog((context, configuration) => configuration.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 
 // --- JSON & Controller Setup ---
 builder.Services.AddControllers()
@@ -22,6 +28,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BusinessLogic.Validators.PaymentDtoValidator>();
 
 // --- EF Core ---
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -31,6 +31,7 @@ public interface ITheaterRepository
     Task UpdateShowinstanceAsync(Showinstance instance);
     Task DeleteShowinstanceAsync(Showinstance instance);
     Task<List<Showinstance>> GetShowinstancesByMovieAsync(int movieId);
+    Task<List<Showinstance>> GetShowinstancesByMovieTheaterAndDateAsync(int movieId, int theaterId, DateOnly date);
     
     // Seat Status Operations
     Task<List<Showseatstatus>> GetSeatStatusesByShowInstanceIdAsync(int showInstanceId);

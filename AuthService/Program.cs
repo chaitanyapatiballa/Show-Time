@@ -10,8 +10,14 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+builder.Host.UseSerilog((context, configuration) => configuration.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 
 // Add controllers with JSON options
 builder.Services.AddControllers()
@@ -20,6 +26,10 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BusinessLogic.Validators.RegisterDtoValidator>();
+
 
 // Swagger with JWT support
 builder.Services.AddEndpointsApiExplorer();

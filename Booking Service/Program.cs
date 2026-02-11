@@ -11,8 +11,14 @@ using PaymentService.Repositories;
 using System.Text;
 using System.Text.Json.Serialization;
 
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+builder.Host.UseSerilog((context, configuration) => configuration.WriteTo.Console().ReadFrom.Configuration(context.Configuration));
 
 // Add Controllers and configure JSON options
 builder.Services.AddControllers()
@@ -21,6 +27,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<BusinessLogic.Validators.BookingDtoValidator>();
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
@@ -83,6 +92,7 @@ builder.Services.AddHttpClient("AuthService", client =>
 
 // SignalR
 builder.Services.AddSignalR();
+builder.Services.AddHostedService<Booking_Service.Workers.ShowInstanceWorker>();
 
 // JWT Authentication
 var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);

@@ -105,10 +105,36 @@ public class TheaterLogic
     {
         return await _repository.GetShowinstancesByMovieAsync(movieId);
     }
+    
+    public async Task<List<ShowinstanceDto>> GetShowsByFiltersAsync(int movieId, int theaterId, DateOnly date)
+    {
+        var instances = await _repository.GetShowinstancesByMovieTheaterAndDateAsync(movieId, theaterId, date);
+        return instances.Select(s => new ShowinstanceDto
+        {
+            Showinstanceid = s.Showinstanceid,
+            Showdate = s.Showdate ?? DateOnly.MinValue,
+            Showtime = s.Showtime ?? TimeOnly.MinValue,
+            Availableseats = s.Availableseats,
+            Showtemplateid = s.Showtemplateid ?? 0
+        }).OrderBy(s => s.Showtime).ToList();
+    }
 
     public async Task<List<Showseatstatus>> GetSeatStatusesByShowInstanceIdAsync(int showInstanceId)
     {
         return await _repository.GetSeatStatusesByShowInstanceIdAsync(showInstanceId);
+    }
+
+    public async Task<List<SeatStatusDto>> GetSeatStatusDtosByShowInstanceIdAsync(int showInstanceId)
+    {
+         var statuses = await _repository.GetSeatStatusesByShowInstanceIdAsync(showInstanceId);
+         return statuses.Select(s => new SeatStatusDto
+         {
+             Seatid = s.Seatid,
+             Row = s.Seat?.Row ?? "",
+             Number = s.Seat?.Number ?? 0,
+             Isbooked = s.Isbooked,
+             Price = s.Seat?.Baseprice ?? 0
+         }).OrderBy(s => s.Row).ThenBy(s => s.Number).ToList();
     }
 
     public async Task<Showinstance> AddShowinstanceAsync(ShowinstanceDto dto)

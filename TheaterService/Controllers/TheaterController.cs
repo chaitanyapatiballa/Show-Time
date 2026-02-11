@@ -134,5 +134,18 @@ namespace TheaterService.Controllers
             var result = await _logic.GetSeatStatusesByShowInstanceIdAsync(showInstanceId);
             return Ok(result);
         }
+        [HttpGet("shows")]
+        public async Task<ActionResult<List<ShowinstanceDto>>> GetShows([FromQuery] int movieId, [FromQuery] int theaterId, [FromQuery] DateOnly date)
+        {
+            var result = await _logic.GetShowsByFiltersAsync(movieId, theaterId, date);
+            return Ok(result);
+        }
+
+        [HttpGet("showinstances/{id}/available-seats")]
+        public async Task<ActionResult<List<SeatStatusDto>>> GetAvailableSeats(int id)
+        {
+            var result = await _logic.GetSeatStatusDtosByShowInstanceIdAsync(id);
+            return Ok(result);
+        }
     }
 }
