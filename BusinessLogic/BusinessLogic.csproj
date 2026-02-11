@@ -17,6 +17,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
 		<ProjectReference Include="..\DBModels\DBModels.csproj" />
 		<ProjectReference Include="..\MessagingLibrary\MessagingLibrary.csproj" />

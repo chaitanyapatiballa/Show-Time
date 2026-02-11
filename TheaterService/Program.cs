@@ -30,8 +30,10 @@ builder.Services.AddSingleton<IRabbitMQConsumer>(sp =>
     new RabbitMQConsumer(configuration["RabbitMQ:ConnectionString"]));
 
 // Dependency Injection
-builder.Services.AddScoped<TheaterRepository>();
+builder.Services.AddScoped<ITheaterRepository, TheaterRepository>();
 builder.Services.AddScoped<TheaterLogic>();
+builder.Services.AddScoped<IVenueRepository, VenueRepository>();
+builder.Services.AddScoped<VenueLogic>();
 
 var app = builder.Build();
 

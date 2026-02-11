@@ -15,6 +15,9 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Event> Events { get; set; }
+    public virtual DbSet<Venue> Venues { get; set; }
+    public virtual DbSet<VenueSection> VenueSections { get; set; }
     public virtual DbSet<Billingsummary> Billingsummaries { get; set; }
 
     public virtual DbSet<Booking> Bookings { get; set; }

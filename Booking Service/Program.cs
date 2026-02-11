@@ -1,4 +1,6 @@
 ﻿using BusinessLogic;
+using BusinessLogic.Middleware;
+using BookingService.Hubs;
 using DataAccessLayer.Repositories;
 using DBModels.Models;
 using MessagingLibrary;
@@ -79,6 +81,9 @@ builder.Services.AddHttpClient("PaymentService", client =>
 builder.Services.AddHttpClient("AuthService", client =>
     client.BaseAddress = new Uri("https://localhost:7255"));
 
+// SignalR
+builder.Services.AddSignalR();
+
 // JWT Authentication
 var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
 
@@ -120,7 +125,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<BookingHub>("/bookingHub");
 app.Run();

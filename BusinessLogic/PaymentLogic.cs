@@ -8,19 +8,27 @@ using PaymentService.Repositories;
 
 namespace PaymentService.Logic;
 
-public class PaymentLogic(
-    BillingsummaryRepository summaryRepo,
-    PaymentRepository paymentRepo,
-    BookingRepository bookingRepo,
-    AppDbContext context, IRabbitMQPublisher publisher)
+public class PaymentLogic
 {
-    private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
-    private readonly PaymentRepository _paymentRepo = paymentRepo;
-    private readonly BookingRepository _bookingRepo = bookingRepo;
-    private readonly AppDbContext _context = context;
+    private readonly BillingsummaryRepository _summaryRepo;
+    private readonly PaymentRepository _paymentRepo;
+    private readonly BookingRepository _bookingRepo;
+    private readonly AppDbContext _context;
     private readonly IRabbitMQPublisher _publisher;
 
-
+    public PaymentLogic(
+        BillingsummaryRepository summaryRepo,
+        PaymentRepository paymentRepo,
+        BookingRepository bookingRepo,
+        AppDbContext context, 
+        IRabbitMQPublisher publisher)
+    {
+        _summaryRepo = summaryRepo;
+        _paymentRepo = paymentRepo;
+        _bookingRepo = bookingRepo;
+        _context = context;
+        _publisher = publisher;
+    }
 
     public async Task<Billingsummary?> CreateSummaryAsync(BillingsummaryDto dto)
     {
@@ -74,9 +82,6 @@ public class PaymentLogic(
            
             string message = $"Payment confirmed for Booking ID: {dto.Bookingid}, User: {userId}, Amount: ₹{dto.Amountpaid}";
             _publisher.Publish("payment-queue", message);
-
-            return payment;
-
 
             return payment;
         }

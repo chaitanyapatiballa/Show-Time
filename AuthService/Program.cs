@@ -1,4 +1,5 @@
 using AuthService.Repositories;
+using BusinessLogic.Middleware;
 using BusinessLogic;
 using DBModels.Models;
 using MessagingLibrary;
@@ -113,6 +114,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthentication(); // Order matters!
 app.UseAuthorization();

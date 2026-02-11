@@ -1,9 +1,11 @@
 ﻿using BusinessLogic;
+using BusinessLogic.Middleware;
 using DataAccessLayer.Repositories;
 using DBModels.Models;
 using MessagingLibrary;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using BusinessLogic.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -32,7 +34,10 @@ builder.Services.AddSingleton<IRabbitMQConsumer>(sp =>
 
 // Register custom services and repositories
 builder.Services.AddScoped<MovieRepository>();
+builder.Services.AddScoped<MovieRepository>();
 builder.Services.AddScoped<MovieLogic>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<EventLogic>();
 
 var app = builder.Build();
 
@@ -43,6 +48,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

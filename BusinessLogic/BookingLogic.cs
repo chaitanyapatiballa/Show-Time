@@ -2,21 +2,32 @@
 using DataAccessLayer.Repositories;
 using DBModels.Dto;
 using PaymentService.Repositories;
+using MessagingLibrary;
 
 namespace BusinessLogic
 {
     public class BookingLogic
-    (
-        BookingRepository bookingRepo,
-        BillingsummaryRepository summaryRepo,
-        PaymentRepository paymentRepo,
-        IHttpClientFactory httpClientFactory
-    )
     {
-        private readonly BookingRepository _repository = bookingRepo;
-        private readonly BillingsummaryRepository _summaryRepo = summaryRepo;
-        private readonly PaymentRepository _paymentRepo = paymentRepo;
-        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly BookingRepository _repository;
+        private readonly BillingsummaryRepository _summaryRepo;
+        private readonly PaymentRepository _paymentRepo;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IRabbitMQPublisher _publisher;
+
+        public BookingLogic(
+            BookingRepository bookingRepo,
+            BillingsummaryRepository summaryRepo,
+            PaymentRepository paymentRepo,
+            IHttpClientFactory httpClientFactory,
+            IRabbitMQPublisher publisher
+        )
+        {
+            _repository = bookingRepo;
+            _summaryRepo = summaryRepo;
+            _paymentRepo = paymentRepo;
+            _httpClientFactory = httpClientFactory;
+            _publisher = publisher;
+        }
 
         public async Task<(bool Success, decimal Amount, string? ErrorMessage)> BookSeatAsync(BookingDto dto, int userId)
         {
@@ -25,6 +36,14 @@ namespace BusinessLogic
                 var seatStatus = await _repository.GetShowseatstatusAsync(dto.Showinstanceid, dto.Seatid);
                 if (seatStatus == null || seatStatus.Isbooked)
                     return (false, 0, "Seat already booked or not found");
+
+                // Check lock
+                if (seatStatus.LockedAt.HasValue && seatStatus.LockedAt.Value.AddMinutes(10) > DateTime.UtcNow)
+                {
+                     // If locked by someone else
+                     if (seatStatus.LockedBy != userId.ToString())
+                         return (false, 0, "Seat is locked by another user");
+                }
 
                 seatStatus.Isbooked = true;
                 var showinstance = await _repository.GetShowinstanceByIdAsync(dto.Showinstanceid);
@@ -51,7 +70,15 @@ namespace BusinessLogic
                 await _repository.SaveBookingAsync(dto.Showinstanceid, dto.Seatid, userId, combinedShowtime, seatPrice);
                 await _repository.SaveChangesAsync();
 
+                // Publish Event
+                string message = $"Booking Created: Show {dto.Showinstanceid}, Seat {dto.Seatid}, User {userId}, Amount {seatPrice}";
+                _publisher.Publish("booking-queue", message);
+
                 return (true, seatPrice, null);
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
+            {
+                return (false, 0, "The seat was modified by another user. Please try again.");
             }
             catch (Exception ex)
             {

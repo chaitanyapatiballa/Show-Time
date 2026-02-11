@@ -17,6 +17,9 @@ public partial class Booking
 
     public DateTime Bookingtime { get; set; }
 
+    public int? EventId { get; set; }
+    public int? VenueId { get; set; }
+
     public int? Movieid { get; set; }
 
     public int? Theaterid { get; set; }
@@ -46,6 +49,9 @@ public partial class Booking
     public virtual Showinstance? Showinstance { get; set; }
 
     public virtual Theater? Theater { get; set; }
+
+    public virtual Event? Event { get; set; }
+    public virtual Venue? Venue { get; set; }
 
     public virtual User User { get; set; } = null!;
 }

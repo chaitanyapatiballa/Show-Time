@@ -103,15 +103,8 @@ namespace TheaterService.Controllers
         [HttpPost("showinstances")]
         public async Task<ActionResult> CreateShowinstance(ShowinstanceDto dto)
         {
-            try
-            {
-                var instance = await _logic.AddShowinstanceAsync(dto);
-                return CreatedAtAction(nameof(GetShowinstanceById), new { id = instance.Showinstanceid }, instance);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var instance = await _logic.AddShowinstanceAsync(dto);
+            return CreatedAtAction(nameof(GetShowinstanceById), new { id = instance.Showinstanceid }, instance);
         }
 
         [HttpPut("showinstances/{id}")]
